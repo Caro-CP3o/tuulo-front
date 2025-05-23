@@ -47,7 +47,12 @@ export default function RegisterPage() {
         // router.push("/login");
       }
     } catch (error) {
-      setError("Registration failed. Please try again.");
+      console.error("Registration error:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }

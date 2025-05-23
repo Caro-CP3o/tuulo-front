@@ -37,36 +37,9 @@ export async function registerUser(data: {
     const responseData = await res.json();
     return { data: responseData };
   } catch (error) {
-    return { error: 'Network error' };
+    console.error('Network error:', error);
+    return { error: error instanceof Error ? error.message : 'Network error' };
   }
-  // const res = await fetch('http://localhost:8000/api/users', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(data),
-  // });
-  // return res.json();
-  // try {
-  //   const res = await fetch("http://localhost:8000/api/users", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify(data),
-  //   });
-
-  //   const result = await res.json();
-
-  //   if (!res.ok) {
-  //     throw new Error(result.error || "Registration failed");
-  //   }
-
-  //   return result;
-  // } catch (err: unknown) {
-  // if (err instanceof Error) {
-  //   return { error: err.message };
-  // }
-  //   return { error: "An unknown error occurred." };
-  // }
 }
 
 export async function createFamily(data: {
