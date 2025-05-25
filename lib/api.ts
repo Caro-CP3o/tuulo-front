@@ -111,3 +111,205 @@ export async function login({ email, password }: { email: string; password: stri
 
   return data;
 }
+
+
+
+export async function fetchMe() {
+  const res = await fetch('http://localhost:8000/api/profile', {
+    credentials: 'include',
+  });
+
+  if (!res.ok) throw new Error('Not authenticated');
+  return await res.json();
+}
+
+
+export async function updateMe(formData: FormData) {
+  try {
+    const updatePayload: Record<string, FormDataEntryValue | string | null> = {};
+
+    // Handle avatar upload if a file is present
+    const imageFile = formData.get("avatar") as File | null;
+    if (imageFile && imageFile instanceof File) {
+      const imageData = new FormData();
+      imageData.append("file", imageFile);
+
+      const imageRes = await fetch("http://localhost:8000/api/media_objects", {
+        method: "POST",
+        body: imageData,
+      });
+
+      if (!imageRes.ok) {
+        const errorData = await imageRes.json();
+        return {
+          error: `Image upload failed: ${errorData.message || JSON.stringify(errorData)}`,
+        };
+      }
+
+      const mediaObject = await imageRes.json();
+      updatePayload.avatar = mediaObject['@id'];
+    }
+
+    // Add form fields only if they're present
+    if (formData.has("password")) updatePayload.password = formData.get("password");
+    if (formData.has("firstName")) updatePayload.firstName = formData.get("firstName");
+    if (formData.has("lastName")) updatePayload.lastName = formData.get("lastName");
+    if (formData.has("birthDate")) updatePayload.birthDate = formData.get("birthDate");
+    if (formData.has("alias")) updatePayload.alias = formData.get("alias") || null;
+
+    // Don't send PATCH if there's nothing to update
+    if (Object.keys(updatePayload).length === 0) {
+      return { error: "No changes to update." };
+    }
+    const user = await fetchMe(); // must return something like { id: 12, ... }
+    const id = user.id;
+
+    const userRes = await fetch(`http://localhost:8000/api/users/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/merge-patch+json",
+      },
+      credentials: "include",
+      body: JSON.stringify(updatePayload),
+    });
+
+    if (!userRes.ok) {
+      const errorData = await userRes.json();
+      return { error: errorData.message || JSON.stringify(errorData) };
+    }
+
+    return { data: await userRes.json() };
+  } catch (error) {
+    console.error("Update error:", error);
+    return {
+      error: error instanceof Error ? error.message : "Update failed.",
+    };
+  }
+}
+
+
+// export async function updateMe(formData: FormData) {
+//   try {
+//         const updatePayload = {
+//       // password: formData.get("password") || undefined,
+//       firstName: formData.get("firstName"),
+//       lastName: formData.get("lastName"),
+//       birthDate: formData.get("birthDate"),
+//       alias: formData.get("alias") || null,
+//       avatar: imageIri,
+//     };
+
+//     // Add form fields only if they're present
+//     // if (formData.has("password")) updatePayload.password = formData.get("password");
+//     if (formData.has("firstName")) updatePayload.firstName = formData.get("firstName");
+//     if (formData.has("lastName")) updatePayload.lastName = formData.get("lastName");
+//     if (formData.has("birthDate")) updatePayload.birthDate = formData.get("birthDate");
+//     if (formData.has("alias")) updatePayload.alias = formData.get("alias") || null;
+
+//     // Handle avatar upload if a file is present
+//     const imageFile = formData.get("avatar") as File | null;
+//     if (imageFile && imageFile instanceof File) {
+//       const imageData = new FormData();
+//       imageData.append("file", imageFile);
+
+//       const imageRes = await fetch("http://localhost:8000/api/media_objects", {
+//         method: "POST",
+//         body: imageData,
+//       });
+
+//       if (!imageRes.ok) {
+//         const errorData = await imageRes.json();
+//         return {
+//           error: `Image upload failed: ${errorData.message || JSON.stringify(errorData)}`,
+//         };
+//       }
+
+//       const mediaObject = await imageRes.json();
+//       updatePayload.avatar = mediaObject['@id'];
+//     }
+
+//     // Don't send PATCH if there's nothing to update
+//     if (Object.keys(updatePayload).length === 0) {
+//       return { error: "No changes to update." };
+//     }
+
+//     const userRes = await fetch("http://localhost:8000/api/users/profile", {
+//       method: "PATCH",
+//       headers: {
+//         "Content-Type": "application/merge-patch+json",
+//       },
+//       credentials: "include",
+//       body: JSON.stringify(updatePayload),
+//     });
+
+//     if (!userRes.ok) {
+//       const errorData = await userRes.json();
+//       return { error: errorData.message || JSON.stringify(errorData) };
+//     }
+
+//     return { data: await userRes.json() };
+//   } catch (error) {
+//     console.error("Update error:", error);
+//     return {
+//       error: error instanceof Error ? error.message : "Update failed.",
+//     };
+//   }
+// }
+
+
+// export async function updateMe(formData: FormData) {
+//   try {
+//     const imageFile = formData.get("avatar") as File | null;
+//     let imageIri: string | null = null;
+
+//     if (imageFile && imageFile instanceof File) {
+//       const imageData = new FormData();
+//       imageData.append("file", imageFile);
+
+//       const imageRes = await fetch("http://localhost:8000/api/media_objects", {
+//         method: "POST",
+//         body: imageData,
+//       });
+
+//       if (!imageRes.ok) {
+//         const errorData = await imageRes.json();
+//         return { error: `Image upload failed: ${errorData.message || JSON.stringify(errorData)}` };
+//       }
+
+//       const mediaObject = await imageRes.json();
+//       imageIri = mediaObject['@id'];
+//     }
+
+//     const updatePayload = {
+//       password: formData.get("password") || undefined,
+//       firstName: formData.get("firstName"),
+//       lastName: formData.get("lastName"),
+//       birthDate: formData.get("birthDate"),
+//       alias: formData.get("alias") || null,
+//       avatar: imageIri,
+//     };
+
+//     if (imageIri) {
+//       updatePayload.avatar = imageIri;
+//     }
+
+//     const userRes = await fetch("http://localhost:8000/api/users/profile", {
+//       method: "PATCH",
+//       headers: {
+//         "Content-Type": "application/merge-patch+json",
+//       },
+//       credentials: "include",
+//       body: JSON.stringify(updatePayload),
+//     });
+
+//     if (!userRes.ok) {
+//       const errorData = await userRes.json();
+//       return { error: errorData.message || JSON.stringify(errorData) };
+//     }
+
+//     return { data: await userRes.json() };
+//   } catch (error) {
+//     console.error("Update error:", error);
+//     return { error: error instanceof Error ? error.message : "Update failed." };
+//   }
+// }
