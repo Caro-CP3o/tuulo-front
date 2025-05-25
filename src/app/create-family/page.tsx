@@ -1,67 +1,86 @@
 "use client";
+
 import { useState } from "react";
+// import { useRouter } from "next/navigation";
 import { createFamily } from "../../../lib/api";
 
-export default function CreateFamilyForm() {
+export default function CreateFamilyPage() {
+  // const router = useRouter();
+
   const [name, setName] = useState("");
-  const [coverImage, setCoverImage] = useState("");
   const [description, setDescription] = useState("");
+  const [coverImage, setCoverImage] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const [message, setMessage] = useState("");
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   const res = await fetch("/api/family/create", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ name, coverImage, description }),
-  //   });
-  //   const data = await res.json();
-  //   setMessage(data.message || data.error);
-  // };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    const res = await createFamily({ name, coverImage, description });
-    setMessage(res.message || res.error || "Something went wrong");
+    const result = await createFamily({
+      name,
+      description: description || null,
+      coverImage: coverImage || null,
+    });
+
+    if ("error" in result) {
+      setError(result.error);
+    } else {
+      // router.push("/dashboard"); // adjust the route as needed
+      alert(
+        "The family has been created. You're gonna be redirected to the login page."
+      );
+    }
+
+    setLoading(false);
   };
 
   return (
-    <div className="max-w-md mx-auto p-4">
-      <h1 className="text-xl font-bold mb-4">New family - step 2</h1>
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded-xl shadow-sm">
+      <h1 className="text-xl font-semibold mb-4">Create Your Family</h1>
+
+      {error && <p className="text-red-500 mb-3">{error}</p>}
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Family Name"
-          required
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="email"
-          value={coverImage}
-          onChange={(e) => setCoverImage(e.target.value)}
-          placeholder="Your Email"
-          required
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="password"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Password"
-          required
-          className="w-full p-2 border rounded"
-        />
+        <div>
+          <label className="block font-medium">Family Name</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="w-full mt-1 border rounded p-2"
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium">Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full mt-1 border rounded p-2"
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium">Cover Image URL</label>
+          <input
+            type="url"
+            value={coverImage}
+            onChange={(e) => setCoverImage(e.target.value)}
+            className="w-full mt-1 border rounded p-2"
+          />
+        </div>
+
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          disabled={loading}
+          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
         >
-          Create Family
+          {loading ? "Creating..." : "Create Family"}
         </button>
       </form>
-      {message && <p className="mt-4 text-gray-700">{message}</p>}
     </div>
   );
 }

@@ -12,47 +12,37 @@ export default function RegisterPage() {
   const [birthDate, setBirthDate] = useState("");
   const [color, setColor] = useState("");
   const [alias, setAlias] = useState("");
-  const [avatar, setAvatar] = useState("");
-
+  const [avatar, setAvatar] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const payload = {
-      email,
-      password,
-      firstName,
-      lastName,
-      birthDate,
-      color,
-      alias: alias || null,
-      avatar: avatar || null,
-    };
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("birthDate", birthDate);
+    formData.append("color", color);
+    if (alias) formData.append("alias", alias);
+    if (avatar) formData.append("avatar", avatar);
 
     try {
-      const result = await registerUser(payload);
-
+      const result = await registerUser(formData);
       if (result.error) {
         setError(result.error);
       } else {
-        // success — redirect or show message
         alert(
           "Registration successful! Please check your email to verify your account."
         );
-        // router.push("/login");
       }
     } catch (error) {
       console.error("Registration error:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Registration failed. Please try again."
-      );
+      setError(error instanceof Error ? error.message : "Registration failed.");
     } finally {
       setLoading(false);
     }
@@ -61,7 +51,11 @@ export default function RegisterPage() {
   return (
     <div className="max-w-md mx-auto mt-10 p-4 border rounded-lg shadow">
       <h1 className="text-xl font-bold mb-4">Register</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+        // encType="multipart/form-data"
+      >
         <input
           type="email"
           value={email}
@@ -116,10 +110,13 @@ export default function RegisterPage() {
           className="w-full p-2 border rounded"
         />
         <input
-          type="text"
-          value={avatar}
-          onChange={(e) => setAvatar(e.target.value)}
-          placeholder="Avatar URL (optional)"
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              setAvatar(e.target.files[0]);
+            }
+          }}
           className="w-full p-2 border rounded"
         />
 
