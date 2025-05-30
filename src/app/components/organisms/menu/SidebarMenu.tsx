@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchMe, fetchMyFamily } from "../../../../../lib/api";
+import { fetchMe, fetchMyFamily } from "@/lib/api";
 // import { User, Family } from "@/types"; // Optional if you want to define types
-import { UserCircle, MessageSquareText, Settings } from "lucide-react";
+import {
+  UserCircle,
+  MessageSquareText,
+  Settings,
+  Notebook,
+  Home,
+} from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 type Family = {
   id: number;
@@ -60,7 +67,7 @@ export default function SidebarMenu() {
   const borderColor = user.color || "#ccc";
 
   return (
-    <aside className="fixed w-[300px] p-[45px] bg-white border-r border-gray-200 flex flex-col items-center min-h-screen mt-16">
+    <aside className="fixed w-[18.75rem] px-[45px] pt-16 bg-white border-r border-gray-200 flex flex-col items-center min-h-screen">
       {/* Avatar */}
       {avatarUrl ? (
         <div
@@ -85,20 +92,38 @@ export default function SidebarMenu() {
         </div>
       )}
       {/* User Name */}
-      <div className="text-lg font-semibold text-center mb-8">
+      <div className="text-lg font-semibold text-center mb-5">
         {displayName}
       </div>
 
       {/* Menu Section Title */}
-      <div className="text-sm uppercase text-gray-500 mb-6 tracking-wider text-center">
-        {family?.name || "Your Family"}
+      <div className="uppercase text-gray-500 mb-6 tracking-wider text-center">
+        <h1>La famille {family?.name || "Your Family"}</h1>
       </div>
 
       {/* Menu Items */}
-      <nav className="flex flex-col space-y-4 w-full text-center">
+      {/* <nav className="flex flex-col space-y-4 w-full text-center">
         <MenuItem icon={<UserCircle size={20} />} label="Profile" />
+        <MenuItem icon={<Notebook size={20} />} label="Notes" />
         <MenuItem icon={<MessageSquareText size={20} />} label="Messages" />
         <MenuItem icon={<Settings size={20} />} label="Settings" />
+      </nav> */}
+      <nav className="flex flex-col space-y-4 w-full text-center">
+        <Link href="/auth/home-family">
+          <MenuItem icon={<Home size={20} />} label="Home" />
+        </Link>
+        <Link href="/auth/profile-update">
+          <MenuItem icon={<UserCircle size={20} />} label="Profile" />
+        </Link>
+        <Link href="#">
+          <MenuItem icon={<Notebook size={20} />} label="Notes" />
+        </Link>
+        <Link href="#">
+          <MenuItem icon={<MessageSquareText size={20} />} label="Messages" />
+        </Link>
+        <Link href="#">
+          <MenuItem icon={<Settings size={20} />} label="Settings" />
+        </Link>
       </nav>
     </aside>
   );
