@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchMyFamily } from "../../../../lib/api";
+import { fetchMyFamily } from "@/lib/api";
 import Image from "next/image";
 
 export default function Banner() {
@@ -38,7 +38,7 @@ export default function Banner() {
   }
 
   return (
-    <div className="h-48 w-full overflow-hidden fixed z-[300]">
+    <div className="h-48 w-full overflow-hidden z-[300]">
       <Image
         src={coverImage}
         alt="Family Cover"
