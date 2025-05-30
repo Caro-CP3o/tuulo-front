@@ -1,3 +1,6 @@
+import type { MediaObjectType, UserType } from "@/types/api";
+
+// JOIN FAMILY REQUEST
 export async function joinFamilyRequest(data: { email: string; familyCode: string }) {
   const res = await fetch('/api/family/join-request', {
     method: 'POST',
@@ -7,11 +10,13 @@ export async function joinFamilyRequest(data: { email: string; familyCode: strin
   return res.json();
 }
 
+// APPROVED JOIN FAMILY
 export async function approveFamilyJoin(token: string) {
   const res = await fetch(`/api/family/approve?token=${token}`);
   return res.json();
 }
 
+// REGISTER USER
 export async function registerUser(formData: FormData) {
   try {
     const imageFile = formData.get("avatar") as File | null;
@@ -68,6 +73,7 @@ export async function registerUser(formData: FormData) {
   }
 }
 
+// CREATE FAMILY
 export async function createFamily(data: {
   name: string;
   description?: string | null;
@@ -90,6 +96,7 @@ export async function createFamily(data: {
   }
 }
 
+// LOGIN
 export async function login({ email, password }: { email: string; password: string }) {
   const res = await fetch("http://localhost:8000/api/login", {
     method: "POST",
@@ -112,6 +119,7 @@ export async function login({ email, password }: { email: string; password: stri
   return data;
 }
 
+// LOGOUT
 export async function logout() {
   const res = await fetch("http://localhost:8000/api/logout", {
     method: "POST",
@@ -123,16 +131,21 @@ export async function logout() {
   }
 }
 
-export async function fetchMe() {
+// FETCH ME
+export async function fetchMe(): Promise<UserType> {
   const res = await fetch('http://localhost:8000/api/profile', {
     credentials: 'include',
   });
 
-  if (!res.ok) throw new Error('Not authenticated');
+  if (!res.ok) {
+    throw new Error('Could not load profile');
+  }
+
   return await res.json();
 }
 
 
+// UPDATE USER
 export async function updateMe(formData: FormData) {
   try {
     const updatePayload: Record<string, FormDataEntryValue | string | null> = {};
@@ -159,7 +172,6 @@ export async function updateMe(formData: FormData) {
       updatePayload.avatar = mediaObject['@id'];
     }
     
-
     // Add form fields only if they're present
     if (formData.has("password")) updatePayload.password = formData.get("password");
     if (formData.has("firstName")) updatePayload.firstName = formData.get("firstName");
@@ -174,9 +186,15 @@ export async function updateMe(formData: FormData) {
     const user = await fetchMe(); // must return something like { id: 12, ... }
     const id = user.id;
     // const previousAvatar = user.avatar;
-    const previousAvatar = typeof user.avatar === "object" && user.avatar !== null
-  ? user.avatar['@id']
-  : user.avatar; // fallback if already string
+    
+  //   const previousAvatar = typeof user.avatar === "object" && user.avatar !== null
+  // ? user.avatar['@id']
+  // : user.avatar; // fallback if already string
+  const avatar = user.avatar as MediaObjectType & { "@id"?: string };
+const previousAvatar =
+  typeof avatar === "object" && avatar !== null && "@id" in avatar
+    ? avatar["@id"]
+    : (avatar as unknown as string); // fallback if already a string
 
     const userRes = await fetch(`http://localhost:8000/api/users/${id}`, {
       method: "PATCH",
@@ -195,11 +213,20 @@ export async function updateMe(formData: FormData) {
   // Get updated user info
   const updatedUser = await fetchMe();
 
+  const updatedAvatar = updatedUser.avatar as MediaObjectType & { "@id"?: string };
+const updatedAvatarId =
+  typeof updatedAvatar === "object" && updatedAvatar !== null && "@id" in updatedAvatar
+    ? updatedAvatar["@id"]
+    : (updatedAvatar as unknown as string); // fallback if it's just a string
+
   try {
     if (
-    previousAvatar &&
-    previousAvatar !== updatedUser.avatar &&
-    previousAvatar !== updatePayload.avatar // optional double check
+    // previousAvatar &&
+    // previousAvatar !== updatedUser.avatar &&
+    // previousAvatar !== updatePayload.avatar // optional double check
+      previousAvatar &&
+      previousAvatar !== updatedAvatarId &&
+      previousAvatar !== updatePayload.avatar // optional double check
     ) {
       await fetch(`http://localhost:8000${previousAvatar}`, {
         method: "DELETE",
@@ -306,35 +333,6 @@ export async function getFamilyById(id: number) {
   }
 }
 
-
-
-// export async function fetchMyFamily(): Promise<{
-//   data: {
-//     id: number;
-//     name: string;
-//     description?: string;
-//     coverImage?: { contentUrl: string } | string | null;
-//   } | null;
-//   error?: string;
-// }> {
-//   try {
-//     const user = await fetchMe();
-
-//     const familyMember = user.familyMembers?.[0]; // assuming one family per user for now
-//     if (!familyMember || !familyMember.family?.id) {
-//       return { data: null, error: "User is not linked to a family." };
-//     }
-
-//     const { data, error } = await getFamilyById(familyMember.family.id);
-//     return { data, error: error || undefined };
-//   } catch (err) {
-//     return {
-//       data: null,
-//       error: err instanceof Error ? err.message : "Unknown error fetching family.",
-//     };
-//   }
-// }
-
 export async function fetchMyFamily() {
   try {
     const user = await fetchMe();
@@ -378,6 +376,35 @@ export async function fetchMyFamily() {
     };
   }
 }
+
+// export async function fetchMyFamily(): Promise<{
+//   data: {
+//     id: number;
+//     name: string;
+//     description?: string;
+//     coverImage?: { contentUrl: string } | string | null;
+//   } | null;
+//   error?: string;
+// }> {
+//   try {
+//     const user = await fetchMe();
+
+//     const familyMember = user.familyMembers?.[0]; // assuming one family per user for now
+//     if (!familyMember || !familyMember.family?.id) {
+//       return { data: null, error: "User is not linked to a family." };
+//     }
+
+//     const { data, error } = await getFamilyById(familyMember.family.id);
+//     return { data, error: error || undefined };
+//   } catch (err) {
+//     return {
+//       data: null,
+//       error: err instanceof Error ? err.message : "Unknown error fetching family.",
+//     };
+//   }
+// }
+
+
 
 
 
