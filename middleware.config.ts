@@ -1,5 +1,5 @@
-export const config = {
-  matcher: [
-    "/auth/:path*", // Only protect /auth routes
-  ],
-};
+// export const config = {
+//   matcher: [
+//     "/auth/:path*", // Only protect /auth routes
+//   ],
+// };

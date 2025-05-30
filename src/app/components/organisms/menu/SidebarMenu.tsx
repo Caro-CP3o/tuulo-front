@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { UserType } from "@/types/api";
 
 type Family = {
   id: number;
@@ -20,18 +21,18 @@ type Family = {
   coverImage?: { contentUrl: string } | string | null;
 };
 
-type User = {
-  id: number;
-  alias: string;
-  firstName: string;
-  lastName: string;
-  color: string;
-  description?: string;
-  avatar?: { contentUrl: string } | string | null;
-};
+// type User = {
+//   id: number;
+//   alias: string;
+//   firstName: string;
+//   lastName: string;
+//   color: string;
+//   description?: string;
+//   avatar?: { contentUrl: string } | string | null;
+// };
 
 export default function SidebarMenu() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [family, setFamily] = useState<Family | null>(null);
 
   useEffect(() => {
@@ -109,10 +110,10 @@ export default function SidebarMenu() {
         <MenuItem icon={<Settings size={20} />} label="Settings" />
       </nav> */}
       <nav className="flex flex-col space-y-4 w-full text-center">
-        <Link href="/auth/home-family">
+        <Link href="/home">
           <MenuItem icon={<Home size={20} />} label="Home" />
         </Link>
-        <Link href="/auth/profile-update">
+        <Link href="/profile">
           <MenuItem icon={<UserCircle size={20} />} label="Profile" />
         </Link>
         <Link href="#">

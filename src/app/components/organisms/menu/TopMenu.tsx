@@ -60,7 +60,7 @@ export default function TopMenu() {
 
       {/* Center logo */}
       <div className="absolute left-1/2 transform -translate-x-1/2">
-        <Link href="/">
+        <Link href="/home">
           {/* <span className="font-semibold text-lg">TUULO</span> */}
           <Image
             src="/tuulo_logo.png"
