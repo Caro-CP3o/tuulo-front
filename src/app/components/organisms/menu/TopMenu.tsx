@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { fetchMe } from "../../../../../lib/api";
+import { fetchMe } from "../../../../lib/api";
 import Image from "next/image";
 
 export default function TopMenu() {
@@ -44,7 +44,7 @@ export default function TopMenu() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md h-16 flex items-center justify-between px-6 z-[9999]">
+    <header className="bg-white shadow-md h-16 flex items-center justify-between px-6 z-[9999]">
       {/* Left spacer for symmetry */}
       <div className="w-8" />
 
