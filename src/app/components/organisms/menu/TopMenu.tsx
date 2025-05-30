@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { fetchMe } from "../../../../lib/api";
+import { fetchMe, logout } from "@/lib/api";
 import Image from "next/image";
 
 export default function TopMenu() {
@@ -25,19 +25,29 @@ export default function TopMenu() {
     checkAuth();
   }, []);
 
+  // const handleLogout = async () => {
+  //   try {
+  //     const res = await fetch("/api/logout", {
+  //       method: "POST",
+  //       credentials: "include",
+  //     });
+
+  //     if (res.ok) {
+  //       setIsLoggedIn(false);
+  //       router.push("/login");
+  //     } else {
+  //       console.error("Logout failed");
+  //     }
+  //   } catch (err) {
+  //     console.error("Logout error:", err);
+  //   }
+  // };
+
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        setIsLoggedIn(false);
-        router.push("/login");
-      } else {
-        console.error("Logout failed");
-      }
+      await logout(); // use the shared API function
+      setIsLoggedIn(false);
+      router.push("/login");
     } catch (err) {
       console.error("Logout error:", err);
     }
