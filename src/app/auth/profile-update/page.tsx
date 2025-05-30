@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { updateMe, fetchMe } from "../../../lib/api";
+import { updateMe, fetchMe } from "@/lib/api";
 import Image from "next/image";
 
 export default function ProfilePage() {

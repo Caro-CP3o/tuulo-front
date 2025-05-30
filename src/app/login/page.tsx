@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { login } from "../../../lib/api";
+// import { useRouter } from "next/navigation";
+import { login } from "@/lib/api";
+// import { login } from "../../../../lib/api";
 
 export default function LoginPage() {
-  const router = useRouter();
+  // const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -20,8 +21,10 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      // await login(form);
+      // router.push(uth/home-family");
       await login(form);
-      router.push("/dashboard");
+      window.location.href = "/auth/home-family"; // reloads the page to give access to cookie ?
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

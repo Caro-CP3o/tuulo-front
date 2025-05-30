@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import SidebarMenu from "./components/organisms/menu/SidebarMenu";
+// import SidebarMenu from "./components/organisms/menu/SidebarMenu";
 import TopMenu from "./components/organisms/menu/TopMenu";
-import Banner from "./components/atoms/Banner";
+// import Banner from "./components/atoms/Banner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,15 +28,32 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
-        <TopMenu />
-        <Banner />
-        <div className="flex min-h-screen">
-          <SidebarMenu />
-          <main className="flex-1 mt-16">{children}</main>
+        <div className="fixed top-0 left-0 right-0 w-full z-[9999]">
+          <TopMenu />
         </div>
+        <main>{children}</main>
       </body>
     </html>
   );
 }
+
+// return (
+//   <html lang="en">
+//     <body
+//       className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
+//     >
+//       <div className="fixed top-0 left-0 right-0 w-full z-[9999]">
+//         <TopMenu />
+//         <Banner />
+//       </div>
+//       <div className="grid grid-cols-4 min-h-screen mx-auto">
+//         <div className="col-span-1 pt-[300px] min-h-screen">
+//           <SidebarMenu />
+//         </div>
+//         <main className="col-span-3 mt-[364px]">{children}</main>
+//       </div>
+//     </body>
+//   </html>
+// );

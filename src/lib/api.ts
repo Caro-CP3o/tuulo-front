@@ -112,6 +112,15 @@ export async function login({ email, password }: { email: string; password: stri
   return data;
 }
 
+export async function logout() {
+  await fetch("http://localhost:8000/api/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+
+  // Also clear the cookie client-side (even if httpOnly)
+  window.location.href = "/login";
+}
 
 
 export async function fetchMe() {

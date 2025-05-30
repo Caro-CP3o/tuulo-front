@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchMyFamily } from "../../../lib/api";
+import { fetchMyFamily } from "@/lib/api";
 import Image from "next/image";
 
 type Family = {
