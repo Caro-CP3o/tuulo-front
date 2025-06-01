@@ -9,10 +9,41 @@ export type FamilyMemberType = {
   familyId: number;
 };
 
+// export type PostType = {
+//   id: number;
+//   content: string;
+//   createdAt: string;
+// };
 export type PostType = {
   id: number;
+  title: string;
   content: string;
-  createdAt: string;
+  image?: string | null;
+  video?: string | null;
+  createdAt: string; // ISO string format from Symfony
+  updatedAt: string;
+  author: {
+    id: number;
+    // Add any additional fields exposed on the User with 'user:read' group
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+    color?: string;
+  };
+  family: {
+    id: number;
+    name: string;
+    // Add any other fields exposed on the Family with 'post:read' group
+  };
+  postLikes: {
+    id: number;
+    // Add more fields if available in your PostLike serialization
+  }[];
+  postComments: {
+    id: number;
+    content: string;
+    // Add more fields if available in your PostComment serialization
+  }[];
 };
 
 export type PostLikeType = {
