@@ -45,7 +45,7 @@ export default function UpdateFamilyPage({ familyId }: UpdateFamilyPageProps) {
       setError(error);
     } else {
       alert("Family updated successfully!");
-      router.push("/home-family"); // or redirect as needed
+      router.push("/home"); // or redirect as needed
     }
   };
 
