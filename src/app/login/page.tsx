@@ -24,7 +24,7 @@ export default function LoginPage() {
       // await login(form);
       // router.push(uth/home-family");
       await login(form);
-      window.location.href = "/auth/home-family"; // reloads the page to give access to cookie ?
+      window.location.href = "/home"; // reloads the page to give access to cookie ?
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
