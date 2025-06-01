@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { fetchMe, fetchMyFamily } from "@/lib/api";
+import { FamilyType, UserType } from "@/types/api";
+import { hasRole } from "@/helpers/auth";
 // import { User, Family } from "@/types"; // Optional if you want to define types
 import {
   UserCircle,
@@ -12,14 +14,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { UserType } from "@/types/api";
 
-type Family = {
-  id: number;
-  name: string;
-  description?: string;
-  coverImage?: { contentUrl: string } | string | null;
-};
+// type Family = {
+//   id: number;
+//   name: string;
+//   description?: string;
+//   coverImage?: { contentUrl: string } | string | null;
+// };
 
 // type User = {
 //   id: number;
@@ -33,7 +34,7 @@ type Family = {
 
 export default function SidebarMenu() {
   const [user, setUser] = useState<UserType | null>(null);
-  const [family, setFamily] = useState<Family | null>(null);
+  const [family, setFamily] = useState<FamilyType | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -55,6 +56,10 @@ export default function SidebarMenu() {
   }, []);
 
   if (!user) return null;
+
+  if (!user || !hasRole(user, "ROLE_USER")) {
+    return null;
+  }
 
   //   const avatarUrl = typeof user.avatar === "object" ? user.avatar : user.avatar;
   const avatarUrl =
