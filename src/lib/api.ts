@@ -1,43 +1,50 @@
 import type { MediaObjectType, UserType } from "@/types/api";
 
-// JOIN FAMILY REQUEST
+// Types
+// type PostWithAuthor = PostType & { author: UserType };
+
+// === JOIN FAMILY REQUEST ===
 export async function joinFamilyRequest(data: { email: string; familyCode: string }) {
-  const res = await fetch('/api/family/join-request', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const res = await fetch("/api/family/join-request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+
   return res.json();
 }
 
-// APPROVED JOIN FAMILY
+// === APPROVE FAMILY JOIN ===
 export async function approveFamilyJoin(token: string) {
-  const res = await fetch(`/api/family/approve?token=${token}`);
+  const res = await fetch(`/api/family/approve?token=${token}`, {
+    credentials: "include",
+  });
+
   return res.json();
 }
 
-// REGISTER USER
+// === REGISTER USER ===
 export async function registerUser(formData: FormData) {
   try {
     const imageFile = formData.get("avatar") as File | null;
     let imageIri: string | null = null;
 
-    if (imageFile && imageFile instanceof File) {
+    if (imageFile) {
       const imageData = new FormData();
       imageData.append("file", imageFile);
 
-      const imageRes = await fetch("http://localhost:8000/api/media_objects", {
+      const res = await fetch("http://localhost:8000/api/media_objects", {
         method: "POST",
         body: imageData,
       });
 
-      if (!imageRes.ok) {
-        const errorData = await imageRes.json();
-        return { error: `Image upload failed: ${errorData.message || JSON.stringify(errorData)}` };
+      if (!res.ok) {
+        const error = await res.json();
+        return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
       }
 
-      const mediaObject = await imageRes.json();
-      imageIri = mediaObject['@id'];
+      const media = await res.json();
+      imageIri = media["@id"];
     }
 
     const userPayload = {
@@ -51,29 +58,61 @@ export async function registerUser(formData: FormData) {
       avatar: imageIri,
     };
 
-    const userRes = await fetch("http://localhost:8000/api/users", {
+    const res = await fetch("http://localhost:8000/api/users", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userPayload),
     });
 
-    if (!userRes.ok) {
-      const errorData = await userRes.json();
-      return { error: errorData.message || JSON.stringify(errorData) };
-    }
-
-    const userData = await userRes.json();
-    return { data: userData };
-
-  } catch (error) {
-    console.error("Network error:", error);
-    return { error: error instanceof Error ? error.message : "Network error" };
+    const data = await res.json();
+    return res.ok ? { data } : { error: data.message || JSON.stringify(data) };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Network error" };
   }
 }
 
-// CREATE FAMILY
+// === LOGIN ===
+export async function login(credentials: { email: string; password: string }) {
+  const res = await fetch("http://localhost:8000/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(credentials),
+  });
+
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error("Unexpected server error");
+  }
+
+  if (!res.ok) throw new Error(data?.error || "Login failed");
+  return data;
+}
+
+// === LOGOUT ===
+export async function logout() {
+  const res = await fetch("http://localhost:8000/api/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!res.ok) throw new Error("Logout failed");
+}
+
+// === FETCH ME ===
+export async function fetchMe(): Promise<UserType> {
+  const res = await fetch("http://localhost:8000/api/profile", {
+    credentials: "include",
+  });
+
+  if (!res.ok) throw new Error("Could not load profile");
+
+  return res.json();
+}
+
+// === CREATE FAMILY ===
 export async function createFamily(data: {
   name: string;
   description?: string | null;
@@ -83,76 +122,29 @@ export async function createFamily(data: {
     const res = await fetch("http://localhost:8000/api/families", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: 'include',
+      credentials: "include",
       body: JSON.stringify(data),
     });
 
     const result = await res.json();
     if (!res.ok) throw new Error(result.error || "Failed to create family");
+
     return result;
-  } catch (err: unknown) {
-    if (err instanceof Error) return { error: err.message };
-    return { error: "An unknown error occurred." };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "An unknown error occurred." };
   }
 }
 
-// LOGIN
-export async function login({ email, password }: { email: string; password: string }) {
-  const res = await fetch("http://localhost:8000/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ email, password }),
-  });
-
-  let data;
-  try {
-    data = await res.json();
-  } catch {
-    const text = await res.text();
-    console.error("Failed to parse JSON response:", text);
-    throw new Error("Unexpected server error");
-  }
-
-  if (!res.ok) throw new Error(data?.error || "Login failed");
-
-  return data;
-}
-
-// LOGOUT
-export async function logout() {
-  const res = await fetch("http://localhost:8000/api/logout", {
-    method: "POST",
-    credentials: "include",
-  });
-
-  if (!res.ok) {
-    throw new Error("Logout failed");
-  }
-}
-
-// FETCH ME
-export async function fetchMe(): Promise<UserType> {
-  const res = await fetch('http://localhost:8000/api/profile', {
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    throw new Error('Could not load profile');
-  }
-
-  return await res.json();
-}
-
-
-// UPDATE USER
+// === UPDATE ME ===
 export async function updateMe(formData: FormData) {
   try {
-    const updatePayload: Record<string, FormDataEntryValue | string | null> = {};
+    const user = await fetchMe();
+    const userId = user.id;
 
-    // Handle avatar upload if a file is present
+    const updatePayload: Record<string, unknown> = {};
     const imageFile = formData.get("avatar") as File | null;
-    if (imageFile && imageFile instanceof File) {
+
+    if (imageFile) {
       const imageData = new FormData();
       imageData.append("file", imageFile);
 
@@ -162,124 +154,82 @@ export async function updateMe(formData: FormData) {
       });
 
       if (!imageRes.ok) {
-        const errorData = await imageRes.json();
-        return {
-          error: `Image upload failed: ${errorData.message || JSON.stringify(errorData)}`,
-        };
+        const error = await imageRes.json();
+        return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
       }
 
-      const mediaObject = await imageRes.json();
-      updatePayload.avatar = mediaObject['@id'];
+      const media = await imageRes.json();
+      updatePayload.avatar = media["@id"];
     }
-    
-    // Add form fields only if they're present
-    if (formData.has("password")) updatePayload.password = formData.get("password");
-    if (formData.has("firstName")) updatePayload.firstName = formData.get("firstName");
-    if (formData.has("lastName")) updatePayload.lastName = formData.get("lastName");
-    if (formData.has("birthDate")) updatePayload.birthDate = formData.get("birthDate");
-    if (formData.has("alias")) updatePayload.alias = formData.get("alias") || null;
 
-    // Don't send PATCH if there's nothing to update
-    if (Object.keys(updatePayload).length === 0) {
-      return { error: "No changes to update." };
-    }
-    const user = await fetchMe(); // must return something like { id: 12, ... }
-    const id = user.id;
-    // const previousAvatar = user.avatar;
-    
-  //   const previousAvatar = typeof user.avatar === "object" && user.avatar !== null
-  // ? user.avatar['@id']
-  // : user.avatar; // fallback if already string
-  const avatar = user.avatar as MediaObjectType & { "@id"?: string };
-const previousAvatar =
-  typeof avatar === "object" && avatar !== null && "@id" in avatar
-    ? avatar["@id"]
-    : (avatar as unknown as string); // fallback if already a string
+    ["password", "firstName", "lastName", "birthDate", "alias"].forEach((key) => {
+      if (formData.has(key)) {
+        updatePayload[key] = formData.get(key) || null;
+      }
+    });
 
-    const userRes = await fetch(`http://localhost:8000/api/users/${id}`, {
+    if (Object.keys(updatePayload).length === 0) return { error: "No changes to update." };
+
+    const avatar = user.avatar as MediaObjectType & { "@id"?: string };
+    const previousAvatar = typeof avatar === "object" && avatar?.["@id"] ? avatar["@id"] : (avatar as unknown as string);
+
+    const res = await fetch(`http://localhost:8000/api/users/${userId}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/merge-patch+json",
-      },
+      headers: { "Content-Type": "application/merge-patch+json" },
       credentials: "include",
       body: JSON.stringify(updatePayload),
     });
-    
-    if (!userRes.ok) {
-      const errorData = await userRes.json();
-      return { error: errorData.message || JSON.stringify(errorData) };
+
+    if (!res.ok) {
+      const error = await res.json();
+      return { error: error.message || JSON.stringify(error) };
     }
-  
-  // Get updated user info
-  const updatedUser = await fetchMe();
 
-  const updatedAvatar = updatedUser.avatar as MediaObjectType & { "@id"?: string };
-const updatedAvatarId =
-  typeof updatedAvatar === "object" && updatedAvatar !== null && "@id" in updatedAvatar
-    ? updatedAvatar["@id"]
-    : (updatedAvatar as unknown as string); // fallback if it's just a string
+    const updatedUser = await fetchMe();
+    const updatedAvatar = updatedUser.avatar as MediaObjectType & { "@id"?: string };
+    const updatedAvatarId = updatedAvatar?.["@id"] || (updatedAvatar as unknown as string);
 
-  try {
-    if (
-    // previousAvatar &&
-    // previousAvatar !== updatedUser.avatar &&
-    // previousAvatar !== updatePayload.avatar // optional double check
-      previousAvatar &&
-      previousAvatar !== updatedAvatarId &&
-      previousAvatar !== updatePayload.avatar // optional double check
-    ) {
+    if (previousAvatar && previousAvatar !== updatedAvatarId && previousAvatar !== updatePayload.avatar) {
       await fetch(`http://localhost:8000${previousAvatar}`, {
         method: "DELETE",
         credentials: "include",
       });
     }
-  } catch (deleteError) {
-    console.warn("Failed to delete old avatar:", deleteError);
-  }
 
-
-
-
-    return { data: await userRes.json() };
+    return { data: await res.json() };
   } catch (error) {
-    console.error("Update error:", error);
-    return {
-      error: error instanceof Error ? error.message : "Update failed.",
-    };
+    return { error: error instanceof Error ? error.message : "Update failed." };
   }
 }
 
+// === CREATE FAMILY & LINK USER ===
 export async function createFamilyAndLinkUser(formData: FormData) {
   try {
-    const user = await fetchMe(); // Get current user (must be authenticated)
+    const user = await fetchMe();
     const userId = user?.id;
     if (!userId) return { error: "User not authenticated." };
 
-    // Step 1: Handle cover image upload if any
-    const imageFile = formData.get("coverImage") as File | null;
     let imageIri: string | null = null;
+    const imageFile = formData.get("coverImage") as File | null;
 
-    if (imageFile && imageFile instanceof File) {
+    if (imageFile) {
       const imageData = new FormData();
       imageData.append("file", imageFile);
 
-      const imageRes = await fetch("http://localhost:8000/api/media_objects", {
+      const res = await fetch("http://localhost:8000/api/media_objects", {
         method: "POST",
         body: imageData,
       });
 
-      if (!imageRes.ok) {
-        const errorData = await imageRes.json();
-        return {
-          error: `Cover image upload failed: ${errorData.message || JSON.stringify(errorData)}`,
-        };
+      if (!res.ok) {
+        const error = await res.json();
+        return { error: `Cover image upload failed: ${error.message || JSON.stringify(error)}` };
       }
 
-      const mediaObject = await imageRes.json();
-      imageIri = mediaObject['@id'];
+      const media = await res.json();
+      imageIri = media["@id"];
     }
 
-    // Step 2: Create Family
     const familyRes = await fetch("http://localhost:8000/api/families", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -295,14 +245,13 @@ export async function createFamilyAndLinkUser(formData: FormData) {
     const family = await familyRes.json();
     if (!familyRes.ok) return { error: family?.message || "Failed to create family." };
 
-    // Step 3: Link User to FamilyMember
     const memberRes = await fetch("http://localhost:8000/api/family_members", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
         user: `/api/users/${userId}`,
-        family: family['@id'],
+        family: family["@id"],
       }),
     });
 
@@ -310,26 +259,25 @@ export async function createFamilyAndLinkUser(formData: FormData) {
     if (!memberRes.ok) return { error: member?.message || "Failed to link user to family." };
 
     return { data: { family, member } };
-  } catch (err: unknown) {
-    console.error("Create family error:", err);
-    return {
-      error: err instanceof Error ? err.message : "An unknown error occurred.",
-    };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "An unknown error occurred." };
   }
 }
 
-
+// === GET FAMILY BY ID ===
 export async function getFamilyById(id: number) {
   try {
     const res = await fetch(`http://localhost:8000/api/families/${id}`, {
       headers: { Accept: "application/json" },
+      credentials: "include",
     });
+
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Fetch failed");
+
     return { data, error: null };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return { data: null, error: message };
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err.message : "Unknown error" };
   }
 }
 
@@ -347,7 +295,7 @@ export async function fetchMyFamily() {
     }
 
     const familyMembersJson = await familyMembersRes.json();
-    console.log('familyMembersJson', familyMembersJson); 
+   
 
     const familyMembers = familyMembersJson['member'] || [];
 
@@ -374,6 +322,696 @@ export async function fetchMyFamily() {
       data: null,
       error: err instanceof Error ? err.message : "Unknown error fetching family.",
     };
+  }
+} 
+
+
+
+export async function createPost(formData: FormData) {
+  try {
+    const imageFiles = formData.getAll("image") as File[];
+    const imageIris: string[] = [];
+
+    // Upload all image files
+    for (const file of imageFiles) {
+      if (!(file instanceof File)) continue;
+
+      const imageData = new FormData();
+      imageData.append("file", file);
+
+      const res = await fetch("http://localhost:8000/api/media_objects", {
+        method: "POST",
+        body: imageData,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
+      }
+
+      const media = await res.json();
+      imageIris.push(media["@id"]);
+    }
+
+    // Upload video file (if any)
+    const videoFile = formData.get("video") as File | null;
+    let videoIri: string | null = null;
+
+    if (videoFile instanceof File) {
+      const videoData = new FormData();
+      videoData.append("file", videoFile);
+
+      const res = await fetch("http://localhost:8000/api/media_objects", {
+        method: "POST",
+        body: videoData,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        return { error: `Video upload failed: ${error.message || JSON.stringify(error)}` };
+      }
+
+      const media = await res.json();
+      videoIri = media["@id"];
+    }
+
+    // Prepare the post payload
+    const postPayload = {
+      title: formData.get("title"),
+      content: formData.get("content"),
+      images: imageIris,
+      video: videoIri,
+    };
+
+    // Create the post
+    const res = await fetch("http://localhost:8000/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(postPayload),
+    });
+
+    const data = await res.json();
+    return res.ok ? { data } : { error: data.message || JSON.stringify(data) };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Network error" };
+  }
+}
+
+
+// export async function createPost(data: {
+//   title: string;
+//   description: string;
+//   image?: File[];
+//   video?: string;
+// }) {
+//   try {
+//     const imageIris: string[] = [];
+
+//     // Upload images if present
+//     if (data.image && data.image.length > 0) {
+//       for (const file of data.image) {
+//         const formData = new FormData();
+//         formData.append("file", file);
+
+//         const res = await fetch("http://localhost:8000/api/media_objects", {
+//           method: "POST",
+//           body: formData,
+//           credentials: "include",
+//         });
+
+//         if (!res.ok) {
+//           const error = await res.json();
+//           return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
+//         }
+
+//         const media: MediaObjectType = await res.json();
+//         imageIris.push(media["@id"]);
+//       }
+//     }
+
+//     // Prepare post payload
+//     const postPayload = {
+//       title: data.title,
+//       description: data.description,
+//       images: imageIris,  // assuming your API expects an array of media IRIs for images
+//       video: data.video || null,
+//     };
+
+//     // Create the post
+//     const postRes = await fetch("http://localhost:8000/api/posts", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       credentials: "include",
+//       body: JSON.stringify(postPayload),
+//     });
+
+//     const postData = await postRes.json();
+
+//     if (!postRes.ok) {
+//       return { error: postData.message || JSON.stringify(postData) };
+//     }
+
+//     return { data: postData };
+//   } catch (err) {
+//     return { error: err instanceof Error ? err.message : "Network error" };
+//   }
+// }
+
+
+
+
+
+
+// import type { MediaObjectType, UserType, PostType } from "@/types/api";
+// type PostWithAuthor = PostType & { author: UserType };
+
+// // JOIN FAMILY REQUEST
+// export async function joinFamilyRequest(data: { email: string; familyCode: string }) {
+//   const res = await fetch('/api/family/join-request', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify(data),
+//   });
+//   return res.json();
+// }
+
+// // APPROVED JOIN FAMILY
+// export async function approveFamilyJoin(token: string) {
+//   const res = await fetch(`/api/family/approve?token=${token}`, {
+//     credentials: 'include',
+//   });
+//   return res.json();
+// }
+
+// // REGISTER USER
+// export async function registerUser(formData: FormData) {
+//   try {
+//     const imageFile = formData.get("avatar") as File | null;
+//     let imageIri: string | null = null;
+
+//     if (imageFile && imageFile instanceof File) {
+//       const imageData = new FormData();
+//       imageData.append("file", imageFile);
+
+//       const imageRes = await fetch("http://localhost:8000/api/media_objects", {
+//         method: "POST",
+//         body: imageData,
+//       });
+
+//       if (!imageRes.ok) {
+//         const errorData = await imageRes.json();
+//         return { error: `Image upload failed: ${errorData.message || JSON.stringify(errorData)}` };
+//       }
+
+//       const mediaObject = await imageRes.json();
+//       imageIri = mediaObject['@id'];
+//     }
+
+//     const userPayload = {
+//       email: formData.get("email"),
+//       password: formData.get("password"),
+//       firstName: formData.get("firstName"),
+//       lastName: formData.get("lastName"),
+//       birthDate: formData.get("birthDate"),
+//       color: formData.get("color"),
+//       alias: formData.get("alias") || null,
+//       avatar: imageIri,
+//     };
+
+//     const userRes = await fetch("http://localhost:8000/api/users", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(userPayload),
+//     });
+
+//     if (!userRes.ok) {
+//       const errorData = await userRes.json();
+//       return { error: errorData.message || JSON.stringify(errorData) };
+//     }
+
+//     const userData = await userRes.json();
+//     return { data: userData };
+
+//   } catch (error) {
+//     return { error: error instanceof Error ? error.message : "Network error" };
+//   }
+// }
+
+// // CREATE FAMILY
+// export async function createFamily(data: {
+//   name: string;
+//   description?: string | null;
+//   coverImage?: string | null;
+// }) {
+//   try {
+//     const res = await fetch("http://localhost:8000/api/families", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       credentials: 'include',
+//       body: JSON.stringify(data),
+//     });
+
+//     const result = await res.json();
+//     if (!res.ok) throw new Error(result.error || "Failed to create family");
+//     return result;
+//   } catch (err: unknown) {
+//     if (err instanceof Error) return { error: err.message };
+//     return { error: "An unknown error occurred." };
+//   }
+// }
+
+// // LOGIN
+// export async function login({ email, password }: { email: string; password: string }) {
+//   const res = await fetch("http://localhost:8000/api/login", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     credentials: "include",
+//     body: JSON.stringify({ email, password }),
+//   });
+
+//   let data;
+//   try {
+//     data = await res.json();
+//   } catch {
+//     const text = await res.text();
+//     console.error("Failed to parse JSON response:", text);
+//     throw new Error("Unexpected server error");
+//   }
+
+//   if (!res.ok) throw new Error(data?.error || "Login failed");
+
+//   return data;
+// }
+
+// // LOGOUT
+// export async function logout() {
+//   const res = await fetch("http://localhost:8000/api/logout", {
+//     method: "POST",
+//     credentials: "include",
+//   });
+
+//   if (!res.ok) {
+//     throw new Error("Logout failed");
+//   }
+// }
+
+// // FETCH ME
+// export async function fetchMe(): Promise<UserType> {
+//   const res = await fetch('http://localhost:8000/api/profile', {
+//     credentials: 'include',
+//   });
+
+//   if (!res.ok) {
+//     throw new Error('Could not load profile');
+//   }
+
+//   return await res.json();
+// }
+
+
+// // UPDATE USER
+// export async function updateMe(formData: FormData) {
+//   try {
+//     const updatePayload: Record<string, FormDataEntryValue | string | null> = {};
+
+//     // Handle avatar upload if a file is present
+//     const imageFile = formData.get("avatar") as File | null;
+//     if (imageFile && imageFile instanceof File) {
+//       const imageData = new FormData();
+//       imageData.append("file", imageFile);
+
+//       const imageRes = await fetch("http://localhost:8000/api/media_objects", {
+//         method: "POST",
+//         body: imageData,
+//       });
+
+//       if (!imageRes.ok) {
+//         const errorData = await imageRes.json();
+//         return {
+//           error: `Image upload failed: ${errorData.message || JSON.stringify(errorData)}`,
+//         };
+//       }
+
+//       const mediaObject = await imageRes.json();
+//       updatePayload.avatar = mediaObject['@id'];
+//     }
+    
+//     // Add form fields only if they're present
+//     if (formData.has("password")) updatePayload.password = formData.get("password");
+//     if (formData.has("firstName")) updatePayload.firstName = formData.get("firstName");
+//     if (formData.has("lastName")) updatePayload.lastName = formData.get("lastName");
+//     if (formData.has("birthDate")) updatePayload.birthDate = formData.get("birthDate");
+//     if (formData.has("alias")) updatePayload.alias = formData.get("alias") || null;
+
+//     // Don't send PATCH if there's nothing to update
+//     if (Object.keys(updatePayload).length === 0) {
+//       return { error: "No changes to update." };
+//     }
+//     const user = await fetchMe(); // must return something like { id: 12, ... }
+//     const id = user.id;
+//     // const previousAvatar = user.avatar;
+    
+//   //   const previousAvatar = typeof user.avatar === "object" && user.avatar !== null
+//   // ? user.avatar['@id']
+//   // : user.avatar; // fallback if already string
+//   const avatar = user.avatar as MediaObjectType & { "@id"?: string };
+// const previousAvatar =
+//   typeof avatar === "object" && avatar !== null && "@id" in avatar
+//     ? avatar["@id"]
+//     : (avatar as unknown as string); // fallback if already a string
+
+//     const userRes = await fetch(`http://localhost:8000/api/users/${id}`, {
+//       method: "PATCH",
+//       headers: {
+//         "Content-Type": "application/merge-patch+json",
+//       },
+//       credentials: "include",
+//       body: JSON.stringify(updatePayload),
+//     });
+    
+//     if (!userRes.ok) {
+//       const errorData = await userRes.json();
+//       return { error: errorData.message || JSON.stringify(errorData) };
+//     }
+  
+//   // Get updated user info
+//   const updatedUser = await fetchMe();
+
+//   const updatedAvatar = updatedUser.avatar as MediaObjectType & { "@id"?: string };
+// const updatedAvatarId =
+//   typeof updatedAvatar === "object" && updatedAvatar !== null && "@id" in updatedAvatar
+//     ? updatedAvatar["@id"]
+//     : (updatedAvatar as unknown as string); // fallback if it's just a string
+
+//   try {
+//     if (
+//     // previousAvatar &&
+//     // previousAvatar !== updatedUser.avatar &&
+//     // previousAvatar !== updatePayload.avatar // optional double check
+//       previousAvatar &&
+//       previousAvatar !== updatedAvatarId &&
+//       previousAvatar !== updatePayload.avatar // optional double check
+//     ) {
+//       await fetch(`http://localhost:8000${previousAvatar}`, {
+//         method: "DELETE",
+//         credentials: "include",
+//       });
+//     }
+//   } catch (deleteError) {
+//     console.warn("Failed to delete old avatar:", deleteError);
+//   }
+
+
+
+
+//     return { data: await userRes.json() };
+//   } catch (error) {
+//     console.error("Update error:", error);
+//     return {
+//       error: error instanceof Error ? error.message : "Update failed.",
+//     };
+//   }
+// }
+
+// // CREATE FAMILY
+// export async function createFamilyAndLinkUser(formData: FormData) {
+//   try {
+//     const user = await fetchMe(); // Get current user (must be authenticated)
+//     const userId = user?.id;
+//     if (!userId) return { error: "User not authenticated." };
+
+//     // Step 1: Handle cover image upload if any
+//     const imageFile = formData.get("coverImage") as File | null;
+//     let imageIri: string | null = null;
+
+//     if (imageFile && imageFile instanceof File) {
+//       const imageData = new FormData();
+//       imageData.append("file", imageFile);
+
+//       const imageRes = await fetch("http://localhost:8000/api/media_objects", {
+//         method: "POST",
+//         body: imageData,
+//       });
+
+//       if (!imageRes.ok) {
+//         const errorData = await imageRes.json();
+//         return {
+//           error: `Cover image upload failed: ${errorData.message || JSON.stringify(errorData)}`,
+//         };
+//       }
+
+//       const mediaObject = await imageRes.json();
+//       imageIri = mediaObject['@id'];
+//     }
+
+//     // Step 2: Create Family
+//     const familyRes = await fetch("http://localhost:8000/api/families", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       credentials: "include",
+//       body: JSON.stringify({
+//         name: formData.get("name"),
+//         description: formData.get("description") || null,
+//         coverImage: imageIri,
+//         creator: `/api/users/${userId}`,
+//       }),
+//     });
+
+//     const family = await familyRes.json();
+//     if (!familyRes.ok) return { error: family?.message || "Failed to create family." };
+
+//     // Step 3: Link User to FamilyMember
+//     const memberRes = await fetch("http://localhost:8000/api/family_members", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       credentials: "include",
+//       body: JSON.stringify({
+//         user: `/api/users/${userId}`,
+//         family: family['@id'],
+//       }),
+//     });
+
+//     const member = await memberRes.json();
+//     if (!memberRes.ok) return { error: member?.message || "Failed to link user to family." };
+
+//     return { data: { family, member } };
+//   } catch (err: unknown) {
+//     console.error("Create family error:", err);
+//     return {
+//       error: err instanceof Error ? err.message : "An unknown error occurred.",
+//     };
+//   }
+// }
+
+
+// export async function getFamilyById(id: number) {
+//   try {
+//     const res = await fetch(`http://localhost:8000/api/families/${id}`, {
+//       headers: { Accept: "application/json" },
+//       credentials: 'include',
+//     });
+//     const data = await res.json();
+//     if (!res.ok) throw new Error(data.message || "Fetch failed");
+//     return { data, error: null };
+//   } catch (err: unknown) {
+//     const message = err instanceof Error ? err.message : "Unknown error";
+//     return { data: null, error: message };
+//   }
+// }
+
+
+
+
+// // export async function createPost({
+// //   title,
+// //   content,
+// // }: {
+// //   title: string;
+// //   content: string;
+// // }): Promise<{ data?: PostType; error?: string }> {
+// //   try {
+// //     const res = await fetch('http://localhost:8000/api/posts', {
+// //       method: 'POST',
+// //       credentials: 'include',
+// //       headers: {
+// //         'Content-Type': 'application/json',
+// //       },
+// //       body: JSON.stringify({
+// //         title,
+// //         content,
+// //       }),
+// //     });
+
+// //     const data = await res.json();
+
+// //     if (!res.ok) {
+// //       return { error: data["description"] || "Failed to create post" };
+// //     }
+
+// //     return { data };
+// //   } catch (error: unknown) {
+// //     return {
+// //       error: error instanceof Error ? error.message : 'Unknown error occurred',
+// //     };
+// //   }
+// // }
+// // export async function createPost({
+// //   title,
+// //   content,
+// // }: {
+// //   title: string;
+// //   content: string;
+// // }): Promise<{ data?: PostType; error?: string }> {
+// //   try {
+// //     // Step 1: Get user (for author IRI)
+// //     const user = await fetchMe();
+// //     const authorIri = `/api/users/${user.id}`;
+
+// //     // Step 2: Get family (via helper)
+// //     const { data: family, error: familyError } = await fetchMyFamily();
+// //     if (familyError || !family?.id) {
+// //       return { error: familyError || "Unable to find user's family." };
+// //     }
+// //     const familyIri = `/api/families/${family.id}`;
+
+// //     // Step 3: POST to /api/posts
+// //     const res = await fetch('http://localhost:8000/api/posts', {
+// //       method: 'POST',
+// //       credentials: 'include',
+// //       headers: {
+// //         'Content-Type': 'application/json',
+// //       },
+// //       body: JSON.stringify({
+// //         title,
+// //         content,
+// //         author: authorIri,
+// //         family: familyIri,
+// //       }),
+// //     });
+
+    
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       return { error: data["description"] || "Failed to create post" };
+//     }
+
+//     return { data };
+//   } catch (error: unknown) {
+//     return {
+//       error: error instanceof Error ? error.message : 'Unknown error occurred',
+//     };
+//   }
+// }
+
+
+// export async function createPost({
+//   title,
+//   content,
+// }: {
+//   title: string;
+//   content: string;
+// }): Promise<{ data?: PostType; error?: string }> {
+//   try {
+//     // Step 1: Get user
+//     // const user = await fetchMe();
+//     // const authorIri = `/api/users/${user.id}`;
+
+//     // Step 2: Get family
+//     const { data: family, error: familyError } = await fetchMyFamily();
+//     if (familyError || !family?.id) {
+//       return { error: familyError || "Unable to find user's family." };
+//     }
+//     // const familyIri = `/api/families/${family.id}`;
+
+//     // Step 3: POST to /api/posts
+//     const res = await fetch('http://localhost:8000/api/posts', {
+//       method: 'POST',
+//       credentials: 'include',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         title,
+//         content,
+//         // author: authorIri,
+//         // family: familyIri,
+//       }),
+//     });
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       return { error: data["description"] || "Failed to create post" };
+//     }
+
+//     return { data };
+//   } catch (error: unknown) {
+//     return {
+//       error: error instanceof Error ? error.message : 'Unknown error occurred',
+//     };
+//   }
+// }
+
+// export async function createPost(postData: {
+//   title: string;
+//   content: string;
+//   family: string; // family IRI like "/api/families/123"
+//   author?: string; // optional author IRI if needed by backend
+//   // add other fields as needed
+// }): Promise<{ data?: PostType; error?: string }> {
+//   try {
+//     const res = await fetch('http://localhost:8000/api/posts', {
+//       method: 'POST',
+//       credentials: 'include',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify(postData),
+//     });
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       return { error: data.message || 'Failed to create post' };
+//     }
+
+//     return { data };
+//   } catch (error: unknown) {
+//     return {
+//       error: error instanceof Error ? error.message : 'Unknown error occurred',
+//     };
+//   }
+// }
+
+// export async function fetchFamilyPosts(familyId: number): Promise<{
+//   data: PostWithAuthor[] | null;
+//   error: string | null;
+// }> {
+//   try {
+//     const res = await fetch(`http://localhost:8000/api/families/${familyId}/posts`, {
+//       credentials: "include",
+//     });
+
+//     if (!res.ok) {
+//       // Only throw for unexpected server errors
+//       if (res.status >= 500) {
+//         throw new Error("Une erreur serveur s'est produite.");
+//       }
+//       // Otherwise, treat it as no posts
+//       return { data: [], error: null };
+//     }
+
+//     const data: PostWithAuthor[] = await res.json();
+//     return { data, error: null };
+//   } catch (error: unknown) {
+//     if (error instanceof Error) {
+//       return { data: null, error: error.message };
+//     } else {
+//       return { data: null, error: "Une erreur inconnue s'est produite." };
+//     }
+//   }
+// }
+export async function fetchFamilyPosts(familyId: number) {
+  try {
+    const res = await fetch(`/api/families/${familyId}/posts`, {
+      credentials: "include", // if you're using cookies
+    });
+
+    if (!res.ok) {
+      throw new Error("Il n'y a pas de posts dans cette famille.");
+    }
+
+    const data = await res.json();
+    return { data, error: null };
+  } catch (error: unknown) {
+    return { data: null, error };
   }
 }
 
