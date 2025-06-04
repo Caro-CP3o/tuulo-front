@@ -73,7 +73,7 @@ export default function SidebarMenu() {
   const borderColor = user.color || "#ccc";
 
   return (
-    <aside className="fixed w-[18.75rem] px-[45px] pt-16 bg-white border-r border-gray-200 flex flex-col items-center min-h-screen">
+    <aside className="fixed pt-16 px-[45px] bg-white border-r border-gray-200 flex flex-col items-center justify-center min-h-screen">
       {/* Avatar */}
       {avatarUrl ? (
         <div

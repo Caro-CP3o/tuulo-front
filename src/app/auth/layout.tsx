@@ -14,7 +14,7 @@ export default async function AppLayout({
         <Banner />
       </div>
       <div className="grid grid-cols-4 min-h-screen mx-auto">
-        <aside className="col-span-1 pt-[300px] min-h-screen">
+        <aside className="col-span-1 min-h-screen z-[9998]">
           <SidebarMenu />
         </aside>
         <main className="col-span-3 mt-[364px]">{children}</main>
