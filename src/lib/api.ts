@@ -1,4 +1,4 @@
-import type { MediaObjectType, UserType } from "@/types/api";
+import type { MediaObjectType, PostType, UserType } from "@/types/api";
 
 // Types
 // type PostWithAuthor = PostType & { author: UserType };
@@ -399,8 +399,114 @@ export async function createPost(formData: FormData) {
     return { error: err instanceof Error ? err.message : "Network error" };
   }
 }
+// === FETCH FAMILY POSTS ===
+export async function fetchFamilyPosts(): Promise<{ data: PostType[] | null; error: string | null }> {
+  try {
+    const user = await fetchMe();
+    const userId = user.id;
+
+    const familyMembersRes = await fetch(`http://localhost:8000/api/family_members?user=${userId}`, {
+      credentials: "include",
+    });
+
+    if (!familyMembersRes.ok) {
+      return { data: null, error: "Failed to fetch family memberships." };
+    }
+
+    const familyMembersJson = await familyMembersRes.json();
+    const familyMembers = familyMembersJson['member'] || [];
+
+    if (familyMembers.length === 0) {
+      return { data: null, error: "User is not linked to a family." };
+    }
+
+    let familyId;
+
+    if (typeof familyMembers[0].family === "string") {
+      familyId = familyMembers[0].family.split("/").pop();
+    } else if (typeof familyMembers[0].family === "object" && familyMembers[0].family.id) {
+      familyId = familyMembers[0].family.id;
+    }
+
+    if (!familyId) {
+      return { data: null, error: "Family ID missing in membership." };
+    }
+
+    const postsRes = await fetch(`http://localhost:8000/api/posts?family.id=${familyId}`, {
+      credentials: "include",
+    });
+
+    const posts = await postsRes.json();
+
+    if (!postsRes.ok) {
+      return { data: null, error: posts.message || "Failed to fetch posts." };
+    }
+
+    return { data: posts["hydra:member"] ?? [], error: null };
+  } catch (err) {
+    return {
+      data: null,
+      error: err instanceof Error ? err.message : "Unknown error fetching posts.",
+    };
+  }
+}
+// export async function fetchFamilyPosts(familyId: number) {
+//   try {
+//     const res = await fetch(`http://localhost:8000/api/posts?family.id=${familyId}`, {
+//       credentials: "include",
+//     });
+
+//     if (!res.ok) {
+//       const error = await res.json();
+//       return { data: null, error: error.message || "Failed to fetch posts." };
+//     }
+
+//     const json = await res.json();
+//     return { data: json["hydra:member"] || [], error: null };
+//   } catch (err) {
+//     return {
+//       data: null,
+//       error: err instanceof Error ? err.message : "Unknown error fetching posts.",
+//     };
+//   }
+// }
 
 
+
+
+// export async function likePost(postId: number, userId: number) {
+//   try {
+//     const res = await fetch("http://localhost:8000/api/post_likes", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       credentials: "include",
+//       body: JSON.stringify({
+//         post: `/api/posts/${postId}`,
+//         user: `/api/users/${userId}`,
+//       }),
+//     });
+
+//     if (!res.ok) {
+//       const error = await res.json();
+//       return { error: error.message || "Could not like post" };
+//     }
+
+//     const data = await res.json();
+//     return { data };
+//   } catch (err) {
+//     return {
+//       error: err instanceof Error ? err.message : "Unexpected error liking post",
+//     };
+//   }
+// }
+  // export async function unlikePost(postId: number, userId: number) {
+  // try {
+  //   const res = await fetch(`http://localhost:8000/api/post_likes/${postId}/${userId}`, {
+  //     method: "DELETE",
+  //     credentials: "include",
+  //   });
 // export async function createPost(data: {
 //   title: string;
 //   description: string;
@@ -998,22 +1104,22 @@ export async function createPost(formData: FormData) {
 //     }
 //   }
 // }
-export async function fetchFamilyPosts(familyId: number) {
-  try {
-    const res = await fetch(`/api/families/${familyId}/posts`, {
-      credentials: "include", // if you're using cookies
-    });
+// export async function fetchFamilyPosts(familyId: number) {
+//   try {
+//     const res = await fetch(`/api/families/${familyId}/posts`, {
+//       credentials: "include", // if you're using cookies
+//     });
 
-    if (!res.ok) {
-      throw new Error("Il n'y a pas de posts dans cette famille.");
-    }
+//     if (!res.ok) {
+//       throw new Error("Il n'y a pas de posts dans cette famille.");
+//     }
 
-    const data = await res.json();
-    return { data, error: null };
-  } catch (error: unknown) {
-    return { data: null, error };
-  }
-}
+//     const data = await res.json();
+//     return { data, error: null };
+//   } catch (error: unknown) {
+//     return { data: null, error };
+//   }
+// }
 
 // export async function fetchMyFamily(): Promise<{
 //   data: {

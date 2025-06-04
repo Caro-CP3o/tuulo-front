@@ -18,8 +18,8 @@ export type PostType = {
   id: number;
   title: string;
   content: string;
-  image?: string | null;
-  video?: string | null;
+  images?: { contentUrl: string }[];
+  video?: { contentUrl: string };
   createdAt: string; // ISO string format from Symfony
   updatedAt: string;
   author: {
@@ -27,8 +27,9 @@ export type PostType = {
     // Add any additional fields exposed on the User with 'user:read' group
     firstName?: string;
     lastName?: string;
-    avatar?: string;
-    color?: string;
+    alias?: string;
+    avatar?: { contentUrl: string };
+    color: string;
   };
   family: {
     id: number;
