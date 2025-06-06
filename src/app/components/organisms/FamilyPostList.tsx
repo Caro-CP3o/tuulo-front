@@ -32,7 +32,6 @@ export default function FamilyPostList() {
         setLoading(false);
         return;
       }
-
       try {
         const res = await fetch(
           `http://localhost:8000/api/posts?family=/api/families/${family.id}`,
@@ -55,13 +54,17 @@ export default function FamilyPostList() {
     loadPosts();
   }, []);
 
+  const handlePostDelete = (deletedPostId: number) => {
+    setPosts((prevPosts) => prevPosts.filter((p) => p.id !== deletedPostId));
+  };
+
   if (loading) return <p>Loading posts...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <div className="space-y-4">
       {posts.map((post) => (
-        <PostItem key={post.id} post={post} />
+        <PostItem key={post.id} post={post} onDelete={handlePostDelete} />
       ))}
     </div>
   );
