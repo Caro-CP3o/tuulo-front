@@ -541,3 +541,92 @@ export async function deletePost(postId: number) {
     return { error: err instanceof Error ? err.message : "Network error" };
   }
 }
+
+export async function updatePost(postId: number, formData: FormData) {
+  try {
+    // 1. Upload new images if any
+    const imageFiles = formData.getAll("image") as File[];
+    const imageIris: string[] = [];
+
+    for (const file of imageFiles) {
+      if (!(file instanceof File)) continue;
+
+      const imageData = new FormData();
+      imageData.append("file", file);
+
+      const res = await fetch("http://localhost:8000/api/media_objects", {
+        method: "POST",
+        body: imageData,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
+      }
+
+      const media = await res.json();
+      imageIris.push(media["@id"]);
+    }
+
+    // 2. Upload new video if any
+    const videoFile = formData.get("video") as File | null;
+    let videoIri: string | null = null;
+
+    if (videoFile instanceof File) {
+      const videoData = new FormData();
+      videoData.append("file", videoFile);
+
+      const res = await fetch("http://localhost:8000/api/media_objects", {
+        method: "POST",
+        body: videoData,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        return { error: `Video upload failed: ${error.message || JSON.stringify(error)}` };
+      }
+
+      const media = await res.json();
+      videoIri = media["@id"];
+    }
+
+    // 3. Build patch payload with optional fields
+    const patchPayload: Record<string, unknown> = {};
+
+    const title = formData.get("title");
+    if (title) patchPayload.title = title;
+
+    const content = formData.get("content");
+    if (content) patchPayload.content = content;
+
+    if (imageIris.length > 0) patchPayload.images = imageIris;
+    if (videoIri !== null) patchPayload.video = videoIri;
+
+    if (Object.keys(patchPayload).length === 0) {
+      return { error: "No changes to update." };
+    }
+
+    // 4. Send PATCH request to update the post
+    const res = await fetch(`http://localhost:8000/api/posts/${postId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/merge-patch+json" },
+      credentials: "include",
+      body: JSON.stringify(patchPayload),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      return { error: error.message || JSON.stringify(error) };
+    }
+
+    const updatedPost = await res.json();
+
+    // OPTIONAL: You can fetch the old post before updating and delete replaced media similar to your updateMe function here
+
+    return { data: updatedPost };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Network error" };
+  }
+}
