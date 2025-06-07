@@ -1,16 +1,12 @@
 "use client";
 
 import React from "react";
-import AddPostForm from "../../components/molecules/AddPostForm";
+// import AddPostForm from "../../components/molecules/AddPostForm";
 import FamilyPostList from "../../components/organisms/FamilyPostList";
 
 export default function HomePage() {
   return (
     <main className="max-w-3xl mx-auto px-4 pb-8">
-      <section className="">
-        <AddPostForm />
-      </section>
-
       <section className="space-y-4">
         <FamilyPostList />
       </section>
