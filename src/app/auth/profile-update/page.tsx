@@ -90,7 +90,8 @@ export default function ProfilePage() {
 
     setLoading(false);
   };
-
+  console.log("---------currrent avatar--------", currentAvatarUrl);
+  console.log("---------preview-------", previewUrl);
   return (
     <div className="max-w-md mx-auto mt-10 p-4 border rounded-lg shadow">
       <h1 className="text-xl font-bold mb-4">{firstName}&apos;s Profile</h1>
