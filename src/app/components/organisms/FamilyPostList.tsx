@@ -1,20 +1,10 @@
-// components/organisms/FamilyPostList.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { fetchMyFamily } from "@/lib/api";
 import PostItem from "../molecules/PostItem";
+import AddPostForm from "../molecules/AddPostForm";
 import { PostType } from "@/types/api";
-
-// type Post = {
-//   id: number;
-//   title: string;
-//   content: string;
-//   createdAt: string;
-//   images?: { contentUrl: string }[];
-//   video?: { contentUrl: string };
-//   author?: { alias?: string; firstName?: string };
-// };
 
 export default function FamilyPostList() {
   const [posts, setPosts] = useState<PostType[]>([]);
@@ -53,7 +43,13 @@ export default function FamilyPostList() {
 
     loadPosts();
   }, []);
-
+  const handlePostCreate = (newPost: PostType) => {
+    setPosts((prevPosts) => [newPost, ...prevPosts]);
+  };
+  console.log("posts:", posts);
+  // const handlePostCreate = (postId: number) => {
+  //   setPosts((prevPosts) => [{ id: postId } as PostType, ...prevPosts]); // Add to top of list
+  // };
   const handlePostDelete = (deletedPostId: number) => {
     setPosts((prevPosts) => prevPosts.filter((p) => p.id !== deletedPostId));
   };
@@ -62,10 +58,15 @@ export default function FamilyPostList() {
   if (error) return <p className="text-red-600">{error}</p>;
 
   return (
-    <div className="space-y-4">
-      {posts.map((post) => (
-        <PostItem key={post.id} post={post} onDelete={handlePostDelete} />
-      ))}
-    </div>
+    <>
+      <section className="">
+        <AddPostForm onCreate={handlePostCreate} />
+      </section>
+      <div className="space-y-4">
+        {posts.map((post) => (
+          <PostItem key={post.id} post={post} onDelete={handlePostDelete} />
+        ))}
+      </div>
+    </>
   );
 }

@@ -12,7 +12,7 @@ type PostItemProps = {
 };
 
 export default function PostItem({ post, onDelete }: PostItemProps) {
-  const { title, content, createdAt, images, video, author } = post;
+  const { title, content, createdAt, image, video, author } = post;
 
   const [editMode, setEditMode] = useState(false);
   const [editTitle, setEditTitle] = useState(title || "");
@@ -25,17 +25,24 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
     formData.append("title", editTitle);
     formData.append("content", editContent);
 
-    if (fileInputRef.current?.files?.length) {
-      for (const file of Array.from(fileInputRef.current.files)) {
-        formData.append("image", file);
-      }
+    const newImageFile = fileInputRef.current?.files?.[0];
+    const newVideoFile = videoInputRef.current?.files?.[0];
+
+    if (newImageFile) {
+      formData.append("image", newImageFile);
     }
 
-    if (videoInputRef.current?.files?.[0]) {
-      formData.append("video", videoInputRef.current.files[0]);
+    if (newVideoFile) {
+      formData.append("video", newVideoFile);
     }
 
-    const result = await updatePost(post.id, formData);
+    const result = await updatePost(
+      post.id.toString(),
+      formData,
+      post.image?.["@id"] || null,
+      post.video?.["@id"] || null
+    );
+
     setDropdownOpen(false);
     setEditMode(false);
 
@@ -43,30 +50,63 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
       alert(`Update failed: ${result.error}`);
     } else {
       alert("Post updated successfully");
-      // Optionally: refresh the post list or update UI
+      // Optionally reload or re-fetch the updated post
     }
   };
+  // const handleUpdatePost = async () => {
+  //   const formData = new FormData();
+  //   formData.append("title", editTitle);
+  //   formData.append("content", editContent);
 
+  //   if (fileInputRef.current?.files?.length) {
+  //     for (const file of Array.from(fileInputRef.current.files)) {
+  //       formData.append("image", file);
+  //     }
+  //   }
+
+  //   if (videoInputRef.current?.files?.[0]) {
+  //     formData.append("video", videoInputRef.current.files[0]);
+  //   }
+
+  //   const result = await updatePost(post.id, formData);
+  //   setDropdownOpen(false);
+  //   setEditMode(false);
+
+  //   if (result.error) {
+  //     alert(`Update failed: ${result.error}`);
+  //   } else {
+  //     alert("Post updated successfully");
+  //     // Optionally: refresh the post list or update UI
+  //   }
+  // };
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const authorName =
-    author?.alias ||
-    (author?.firstName && author?.lastName
-      ? `${author.firstName} ${author.lastName}`
-      : author?.firstName || "Unknown");
+  // const authorName =
+  //   author?.alias ||
+  //   (author?.firstName && author?.lastName
+  //     ? `${author.firstName} ${author.lastName}`
+  //     : author?.firstName || "Unknown");
+  const authorFirstName = author.firstName;
+  const authorLastName = author.lastName;
+  const alias = author?.alias || "";
 
   const avatarUrl = author?.avatar?.contentUrl
     ? `http://localhost:8000${author.avatar.contentUrl}`
     : "/default-avatar.png";
 
   const videoUrl = video?.contentUrl
-    ? `http://localhost:8000${video.contentUrl}`
+    ? `http://localhost:8000${post.video?.contentUrl}`
+    : null;
+  const imageUrl = image?.contentUrl
+    ? `http://localhost:8000${image.contentUrl}`
     : null;
 
   const authorColor = author?.color || "#888888";
+
+  console.log("Image URL:", imageUrl);
 
   // ✅ Load like status on mount
   useEffect(() => {
@@ -145,7 +185,7 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
   return (
     <>
       {editMode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-30">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
             <h2 className="text-lg font-semibold mb-4">Modifier le post</h2>
             <div className="flex flex-col gap-3">
@@ -195,10 +235,11 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
       )}
 
       <div className="flex flex-col md:flex-row bg-white rounded-xl overflow-hidden shadow-md justify-between">
-        {Array.isArray(images) && images.length > 0 && (
+        {imageUrl && (
           <div className="md:w-1/3 w-full relative aspect-[3/2] md:aspect-auto">
             <Image
-              src={`http://localhost:8000${images[0].contentUrl}`}
+              // src={`http://localhost:8000${image?.contentUrl}`}
+              src={imageUrl}
               alt="Post image"
               className="object-cover rounded"
               fill
@@ -225,7 +266,9 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
               )}
             </div>
             <div className="flex flex-col justify-center">
-              <p className="satisfy text-xl">Posté par {authorName}</p>
+              <p className="satisfy text-xl">
+                {authorFirstName} {authorLastName} - {alias}
+              </p>
               <p className="text-sm">
                 {new Date(createdAt).toLocaleDateString()}
               </p>

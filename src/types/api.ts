@@ -18,8 +18,9 @@ export type PostType = {
   id: number;
   title: string;
   content: string;
-  images?: { contentUrl: string }[];
-  video?: { contentUrl: string };
+  image?: { contentUrl: string; "@id": string; };
+  video?: { contentUrl: string; "@id": string; };
+
   createdAt: string; // ISO string format from Symfony
   updatedAt: string;
   author: {
