@@ -5,7 +5,7 @@ import { createPost } from "@/lib/api";
 import { PostType } from "@/types/api";
 
 type PostFormProps = {
-  onCreate?: (post: PostType) => void; // ✅ Fix here
+  onCreate?: (post: PostType) => void;
 };
 
 export default function PostForm({ onCreate }: PostFormProps) {
