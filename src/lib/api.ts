@@ -151,6 +151,7 @@ export async function updateMe(formData: FormData) {
       const imageRes = await fetch("http://localhost:8000/api/media_objects", {
         method: "POST",
         body: imageData,
+        credentials: "include",
       });
 
       if (!imageRes.ok) {
@@ -171,7 +172,13 @@ export async function updateMe(formData: FormData) {
     if (Object.keys(updatePayload).length === 0) return { error: "No changes to update." };
 
     const avatar = user.avatar as MediaObjectType & { "@id"?: string };
-    const previousAvatar = typeof avatar === "object" && avatar?.["@id"] ? avatar["@id"] : (avatar as unknown as string);
+    // const previousAvatar = typeof avatar === "object" && avatar?.["@id"] ? avatar["@id"] : (avatar as unknown as string);
+    const previousAvatar =
+  typeof avatar === "string"
+    ? avatar
+    : typeof avatar === "object" && avatar?.["@id"]
+    ? avatar["@id"]
+    : null;
 
     const res = await fetch(`http://localhost:8000/api/users/${userId}`, {
       method: "PATCH",
@@ -756,6 +763,78 @@ console.log(JSON.stringify(updatePayload, null, 2));
   }
 }
 
+
+export interface CreateCommentPayload {
+  postId: number;
+  content: string;
+  parentId?: number; // optional, for replies
+}
+
+export interface ApiError {
+  status: number;
+  message: string;
+}
+
+export async function postComment(payload: CreateCommentPayload) {
+  try {
+    const response = await fetch('http://localhost:8000/api/post_comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // assumes cookie-based auth
+      body: JSON.stringify({
+        post: `http://localhost:8000/api/posts/${payload.postId}`,
+        content: payload.content,
+        ...(payload.parentId && { parent: `http://localhost:8000/api/post_comments/${payload.parentId}` }),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const message =
+        errorData.message || errorData.detail || 'Unable to post comment.';
+      throw { status: response.status, message } as ApiError;
+    }
+
+    return await response.json();
+  } catch (error: any) {
+    // rethrow in a consistent format
+    throw {
+      status: error.status || 500,
+      message: error.message || 'An unexpected error occurred.',
+    } as ApiError;
+  }
+}
+
+
+// export interface CreateCommentPayload {
+//   postId: number;
+//   content: string;
+//   parentId?: number; // optional, for replying to another comment
+// }
+
+// export async function postComment(payload: CreateCommentPayload) {
+//   const response = await fetch('/api/post_comments', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     credentials: 'include', // if using cookie-based auth
+//     body: JSON.stringify({
+//       post: `/api/posts/${payload.postId}`,
+//       content: payload.content,
+//       ...(payload.parentId && { parent: `/api/post_comments/${payload.parentId}` }),
+//     }),
+//   });
+
+//   if (!response.ok) {
+//     const errorData = await response.json();
+//     throw new Error(errorData?.hydra:description || 'Failed to post comment');
+//   }
+
+//   return await response.json();
+// }
 
 
 
