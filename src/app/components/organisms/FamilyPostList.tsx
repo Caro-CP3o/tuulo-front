@@ -33,7 +33,13 @@ export default function FamilyPostList() {
           }
         );
         const posts = await res.json();
-        setPosts(posts);
+        // setPosts(posts);
+        setPosts(
+          posts.sort(
+            (a: PostType, b: PostType) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+        );
       } catch {
         setError("Failed to load posts.");
       }
