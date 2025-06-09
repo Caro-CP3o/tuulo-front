@@ -53,12 +53,43 @@ export type PostLikeType = {
   postId: number;
 };
 
+// export type PostCommentType = {
+//   id: number;
+//   content: string;
+//   createdAt: string;
+//     author: {
+//     id: number;
+//     firstName?: string;
+//     lastName?: string;
+//     alias?: string;
+//     avatar?: { contentUrl: string };
+//     color: string;
+//   };
+// };
 export type PostCommentType = {
   id: number;
   content: string;
-  createdAt: string;
-};
+  createdAt: string;   // ISO date string from \DateTimeImmutable
+  updatedAt: string;   // Also returned by your API per entity
 
+  // User info, mapped from your `user` relation (author)
+  user: {
+    id: number;
+    firstName?: string;
+    lastName?: string;
+    alias?: string;
+    avatar?: { contentUrl: string };
+    color: string;
+  };
+
+  // Optional parent comment ID (nullable)
+  parent?: {
+    id: number;
+  } | null;
+
+  // Replies are a collection of nested PostCommentType
+  replies?: PostCommentType[];
+};
 export type UserType = {
   id: number;
   email: string;
