@@ -78,14 +78,14 @@ export default function TopMenu() {
         {isLoggedIn ? (
           <button
             onClick={handleLogout}
-            className="text-sm font-medium text-gray-700 hover:text-black"
+            className="text-sm font-medium hover:text-red-400 transition-colors"
           >
             Logout
           </button>
         ) : (
           <Link
             href="/login"
-            className="text-sm font-medium text-gray-700 hover:text-black"
+            className="text-sm font-medium hover:text-red-400 transition-colors"
           >
             Login
           </Link>

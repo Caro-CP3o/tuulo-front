@@ -74,36 +74,52 @@ export default function SidebarMenu() {
 
   return (
     <aside className="fixed pt-16 px-[45px] bg-white border-r border-gray-200 flex flex-col items-center justify-center min-h-screen">
-      {/* Avatar */}
-      {avatarUrl ? (
-        <div
-          className="w-24 h-24 rounded-full overflow-hidden border-[5px] mb-4"
-          style={{ borderColor }}
-        >
-          <Image
-            src={avatarUrl}
-            alt="User avatar"
-            width={96}
-            height={96}
-            className="object-cover w-full h-full"
-            unoptimized
-          />
-        </div>
-      ) : (
-        <div
-          className="w-24 h-24 rounded-full overflow-hidden border-[5px] mb-4 bg-gray-200 flex items-center justify-center text-gray-500"
-          style={{ borderColor }}
-        >
-          No Avatar
-        </div>
-      )}
-      {/* User Name */}
-      <div className="text-lg font-semibold text-center mb-5">
-        {displayName}
+      <div className="relative w-24 h-24 mb-4">
+        {/* Star: Top right */}
+        <Image
+          src="/star.png"
+          alt="star"
+          className="absolute top-0 right-[-9px] w-6 h-6"
+          width={6}
+          height={6}
+        />
+        {/* Avatar */}
+        {avatarUrl ? (
+          <div
+            className="w-24 h-24 rounded-full overflow-hidden border-[5px] mb-4"
+            style={{ borderColor }}
+          >
+            <Image
+              src={avatarUrl}
+              alt="User avatar"
+              width={96}
+              height={96}
+              className="object-cover w-full h-full"
+              unoptimized
+            />
+          </div>
+        ) : (
+          <div
+            className="w-24 h-24 rounded-full overflow-hidden border-[5px] mb-4 bg-gray-200 flex items-center justify-center"
+            style={{ borderColor }}
+          >
+            No Avatar
+          </div>
+        )}
+        {/* Star: Bottom left */}
+        <Image
+          src="/star.png"
+          alt="star"
+          className="absolute bottom-0 left-[-9px] w-6 h-6"
+          width={6}
+          height={6}
+        />
       </div>
+      {/* User Name */}
+      <div className="satisfy text-2xl text-center mb-5">{displayName}</div>
 
       {/* Menu Section Title */}
-      <div className="uppercase text-gray-500 mb-6 tracking-wider text-center">
+      <div className="uppercase mb-6 text-sm font-semibold  text-center">
         <h1>La famille {family?.name || "Your Family"}</h1>
       </div>
 
@@ -137,9 +153,9 @@ export default function SidebarMenu() {
 
 function MenuItem({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center space-x-3 text-gray-700 hover:text-black cursor-pointer justify-start">
+    <div className="flex items-center space-x-3 hover:text-red-400 cursor-pointer justify-start">
       {icon}
-      <span className="text-md font-medium">{label}</span>
+      <span className="text-md font-medium hover:text-red-400">{label}</span>
     </div>
   );
 }
