@@ -10,6 +10,8 @@ import {
   deletePost,
   updatePost,
   postComment,
+  deleteComment,
+  updateComment,
 } from "@/lib/api";
 import EditPostModal from "../modals/EditPostModal";
 
@@ -23,31 +25,6 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
   const { title, content, createdAt, image, video, author } = postData;
 
   const [editMode, setEditMode] = useState(false);
-  //   const formData = new FormData();
-  //   formData.append("title", editTitle);
-  //   formData.append("content", editContent);
-
-  //   if (fileInputRef.current?.files?.length) {
-  //     for (const file of Array.from(fileInputRef.current.files)) {
-  //       formData.append("image", file);
-  //     }
-  //   }
-
-  //   if (videoInputRef.current?.files?.[0]) {
-  //     formData.append("video", videoInputRef.current.files[0]);
-  //   }
-
-  //   const result = await updatePost(post.id, formData);
-  //   setDropdownOpen(false);
-  //   setEditMode(false);
-
-  //   if (result.error) {
-  //     alert(`Update failed: ${result.error}`);
-  //   } else {
-  //     alert("Post updated successfully");
-  //     // Optionally: refresh the post list or update UI
-  //   }
-  // };
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -110,78 +87,6 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  // ===  ===
-  // useEffect(() => {
-  //   async function fetchComments(): Promise<PostCommentType[]> {
-  //     try {
-  //       const response = await fetch(
-  //         `http://localhost:8000/api/post_comments?post=${post.id}`,
-  //         {
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           credentials: "include",
-  //         }
-  //       );
-  //       const data = await response.json();
-  //       console.log("Comments API response:", data);
-  //       setComments(data);
-  //     } catch (error) {
-  //       console.error("Failed to load comments", error);
-  //     }
-  //   }
-  //   fetchComments();
-  // }, [post.id]);
-
-  // useEffect(() => {
-  //   async function fetchComments(): Promise<void> {
-  //     try {
-  //       const response = await fetch(
-  //         `http://localhost:8000/api/post_comments?post=${post.id}`,
-  //         {
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           credentials: "include",
-  //         }
-  //       );
-  //       const data = await response.json();
-  //       console.log("Fetched Comments API response:", data);
-
-  //       // setComments(data);
-  //     } catch (error) {
-  //       console.error("Failed to load comments", error);
-  //     }
-  //   }
-  //   fetchComments();
-  // }, [post.id]);
-  // const fetchComments = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8000/api/post_comments?post=${post.id}`,
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         credentials: "include",
-  //       }
-  //     );
-  //     const data = await response.json();
-
-  //     console.log("Fetched Comments API response:", data);
-
-  //     if (Array.isArray(data.member)) {
-  //       setComments(data.member); // ← Extract only the array
-  //     } else {
-  //       console.error("Expected Hydra collection with member[] but got:", data);
-  //       setComments([]);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching comments:", error);
-  //     setComments([]);
-  //   }
-  // };
 
   // ===  ===
   const handleDeletePost = async () => {
@@ -247,7 +152,8 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
     }
   };
   useEffect(() => {
-    if (showComments && comments.length === 0) {
+    // if (showComments && comments.length === 0) {
+    if (showComments) {
       const fetchComments = async () => {
         try {
           const response = await fetch(
@@ -309,6 +215,40 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
     } else {
       alert("Post updated successfully");
       setPostData(result.data as PostType);
+    }
+  };
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+  const handleEditClick = (id: number, currentContent: string) => {
+    setEditingCommentId(id);
+    setEditingContent(currentContent);
+  };
+
+  const handleDeleteClick = async (id: number) => {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) {
+      try {
+        await deleteComment(id);
+        // Remove the deleted comment from UI
+        setComments((prev) => prev.filter((c) => c.id !== id));
+      } catch (error) {
+        alert("Erreur lors de la suppression du commentaire.");
+      }
+    }
+  };
+
+  const handleEditSubmit = async () => {
+    if (editingCommentId === null) return;
+    try {
+      const updated = await updateComment(editingCommentId, editingContent);
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === editingCommentId ? { ...c, content: updated.content } : c
+        )
+      );
+      setEditingCommentId(null);
+      setEditingContent("");
+    } catch (error) {
+      alert("Erreur lors de la modification du commentaire.");
     }
   };
 
@@ -456,19 +396,57 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
                   className="p-2 bg-gray-100 rounded shadow-sm text-sm"
                 >
                   <div className="font-semibold text-gray-700">
-                    {/* {comment.author?.alias ||
-                      `${comment.author?.firstName ?? ""} ${
-                        comment.author?.lastName ?? ""
-                      }`} */}
                     {comment.user?.alias?.trim() ||
                       `${comment.user?.firstName ?? ""} ${
                         comment.user?.lastName ?? ""
                       }`.trim() ||
                       "Anonymous"}
                   </div>
-                  <div>{comment.content}</div>
+                  {/* <div>{comment.content}</div> */}
+                  {editingCommentId === comment.id ? (
+                    <div className="mt-2 space-y-1">
+                      <textarea
+                        value={editingContent}
+                        onChange={(e) => setEditingContent(e.target.value)}
+                        className="w-full p-1 border rounded text-sm"
+                      />
+                      <div className="flex justify-end space-x-2 text-xs mt-1">
+                        <button
+                          onClick={handleEditSubmit}
+                          className="text-green-600 hover:underline"
+                        >
+                          Enregistrer
+                        </button>
+                        <button
+                          onClick={() => setEditingCommentId(null)}
+                          className="text-gray-600 hover:underline"
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>{comment.content}</div>
+                  )}
+
                   <div className="text-xs text-gray-500">
                     {new Date(comment.createdAt).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-right mt-1 space-x-2 text-blue-600">
+                    <button
+                      onClick={() =>
+                        handleEditClick(comment.id, comment.content)
+                      }
+                      className="hover:underline"
+                    >
+                      modifier
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(comment.id)}
+                      className="text-red-600 hover:underline"
+                    >
+                      effacer
+                    </button>
                   </div>
                 </div>
               ))}
