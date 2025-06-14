@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
         source: '/update-family',
         destination: '/auth/update-family',
       },
+      {
+        source: '/settings',
+        destination: '/auth/settings',
+      },
     ];
   },
   images: {
