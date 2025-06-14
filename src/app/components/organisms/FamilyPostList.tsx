@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchMyFamily } from "@/lib/api";
 import PostItem from "../molecules/PostItem";
-import AddPostForm from "../molecules/AddPostForm";
+import AddPostForm from "../forms/AddPostForm";
 import { PostType } from "@/types/api";
 
 export default function FamilyPostList() {
