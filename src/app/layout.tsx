@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+// import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 // import SidebarMenu from "./components/organisms/menu/SidebarMenu";
 import TopMenu from "./components/organisms/menu/TopMenu";
+import { AuthProvider } from "@/app/context/AuthContext";
 // import Banner from "./components/atoms/Banner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// const geistSans = Geist({
+//   variable: "--font-geist-sans",
+//   subsets: ["latin"],
+// });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// const geistMono = Geist_Mono({
+//   variable: "--font-geist-mono",
+//   subsets: ["latin"],
+// });
 
 export const metadata: Metadata = {
   title: "Tuulo",
@@ -27,13 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
-      >
-        <div className="fixed top-0 left-0 right-0 w-full z-[9999]">
+      <body className="antialiased min-h-screen">
+        <div className="fixed top-0 left-0 w-full z-[9999]">
           <TopMenu />
         </div>
-        <main>{children}</main>
+        <main className="flex flex-col min-h-screen items-center justify-center px-4 mt-8">
+          <AuthProvider>{children}</AuthProvider>
+        </main>
       </body>
     </html>
   );

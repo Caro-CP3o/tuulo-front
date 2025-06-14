@@ -21,19 +21,38 @@
   font-style: italic;
 }
 :root {
-  --background: #ffffff;
-  --foreground: #001962;
+  --neutral: #ffffff;
+  --blue: #001962;
+  /* --tuulo: #001962; */
 
   --font-sans: "WorkSans", system-ui, sans-serif;
   --font-handwriting: "Satisfy", cursive;
 }
+/* @layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  label,
+  input,
+  button,
+  a,
+  div {
+    color: var(--blue);
+  }
+} */
+
 @layer utilities {
   .bg-custom {
     background-color: var(--color-background);
   }
 
   .text-custom {
-    color: var(--color-foreground);
+    color: var(--blue);
   }
   .satisfy {
     font-family: var(--font-handwriting);
@@ -65,15 +84,26 @@
   --font-mono: var(--font-geist-mono);
 } */
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
-    --background: #ffffff;
-    --foreground: #393939;
+    --neutral: #ffffff;
+    --blue: #393939;
   }
-}
+} */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--neutral);
+  color: var(--blue);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+h1 {
+  font-family: var(--font-sans);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  letter-spacing: 0.05em;
+  color: var(--blue);
 }
