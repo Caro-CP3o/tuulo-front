@@ -5,15 +5,13 @@ export type MediaObjectType = {
 
 export type FamilyMemberType = {
   id: number;
-  role: string;
+  email?: string;
+  status: 'pending' | 'active' | 'rejected';
+  joinedAt: string;
   familyId: number;
+  userId: number;
 };
 
-// export type PostType = {
-//   id: number;
-//   content: string;
-//   createdAt: string;
-// };
 export type PostType = {
   id: number;
   title: string;
@@ -110,6 +108,7 @@ export type UserType = {
   isVerified: boolean;
   registrationStep?: string;
   emailVerificationExpiresAt?: string;
+  invitationCode?: string;
 };
 export type FamilyType = {
   id: number;
