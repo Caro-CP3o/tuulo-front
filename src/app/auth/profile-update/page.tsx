@@ -76,6 +76,7 @@ export default function ProfilePage() {
     if (firstName !== user.firstName) formData.append("firstName", firstName);
     if (lastName !== user.lastName) formData.append("lastName", lastName);
     if (birthDate !== user.birthDate) formData.append("birthDate", birthDate);
+    if (color !== user.color) formData.append("color", color);
     if ((alias || "") !== (user.alias || ""))
       formData.append("alias", alias || "");
     if (avatar) formData.append("avatar", avatar);
@@ -158,7 +159,7 @@ export default function ProfilePage() {
         <input
           type="color"
           value={color}
-          readOnly
+          onChange={(e) => setColor(e.target.value)}
           className="w-full p-2 border rounded bg-gray-100"
         />
         <input
