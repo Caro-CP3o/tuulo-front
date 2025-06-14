@@ -15,23 +15,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 
-// type Family = {
-//   id: number;
-//   name: string;
-//   description?: string;
-//   coverImage?: { contentUrl: string } | string | null;
-// };
-
-// type User = {
-//   id: number;
-//   alias: string;
-//   firstName: string;
-//   lastName: string;
-//   color: string;
-//   description?: string;
-//   avatar?: { contentUrl: string } | string | null;
-// };
-
 export default function SidebarMenu() {
   const [user, setUser] = useState<UserType | null>(null);
   const [family, setFamily] = useState<FamilyType | null>(null);
@@ -124,12 +107,6 @@ export default function SidebarMenu() {
       </div>
 
       {/* Menu Items */}
-      {/* <nav className="flex flex-col space-y-4 w-full text-center">
-        <MenuItem icon={<UserCircle size={20} />} label="Profile" />
-        <MenuItem icon={<Notebook size={20} />} label="Notes" />
-        <MenuItem icon={<MessageSquareText size={20} />} label="Messages" />
-        <MenuItem icon={<Settings size={20} />} label="Settings" />
-      </nav> */}
       <nav className="flex flex-col space-y-4 w-full text-center">
         <Link href="/home">
           <MenuItem icon={<Home size={20} />} label="Home" />
@@ -143,7 +120,7 @@ export default function SidebarMenu() {
         <Link href="#">
           <MenuItem icon={<MessageSquareText size={20} />} label="Messages" />
         </Link>
-        <Link href="#">
+        <Link href="settings">
           <MenuItem icon={<Settings size={20} />} label="Settings" />
         </Link>
       </nav>
