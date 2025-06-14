@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { joinFamilyRequest } from "../../lib/api";
+import { joinFamilyRequest } from "../../src/lib/api";
 // import { joinFamilyRequest } from "@/lib/api";
 
 export default function JoinRequestForm() {
