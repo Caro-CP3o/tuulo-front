@@ -1,28 +1,5 @@
 import type { MediaObjectType, PostType, UserType } from "@/types/api";
 
-// Types
-// type PostWithAuthor = PostType & { author: UserType };
-
-// === JOIN FAMILY REQUEST ===
-export async function joinFamilyRequest(data: { email: string; familyCode: string }) {
-  const res = await fetch("/api/family/join-request", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-
-  return res.json();
-}
-
-// === APPROVE FAMILY JOIN ===
-export async function approveFamilyJoin(token: string) {
-  const res = await fetch(`/api/family/approve?token=${token}`, {
-    credentials: "include",
-  });
-
-  return res.json();
-}
-
 // === REGISTER USER ===
 export async function registerUser(formData: FormData) {
   try {
@@ -56,6 +33,7 @@ export async function registerUser(formData: FormData) {
       color: formData.get("color"),
       alias: formData.get("alias") || null,
       avatar: imageIri,
+      invitationCode: formData.get("invitationCode") || null,
     };
 
     const res = await fetch("http://localhost:8000/api/users", {
@@ -101,13 +79,29 @@ export async function logout() {
   if (!res.ok) throw new Error("Logout failed");
 }
 
+// // === FETCH ME ===
+// export async function fetchMe(): Promise<UserType> {
+//   const res = await fetch("http://localhost:8000/api/profile", {
+//     credentials: "include",
+//   });
+
+//   if (!res.ok) throw new Error("Could not load profile");
+
+//   return res.json();
+// }
 // === FETCH ME ===
 export async function fetchMe(): Promise<UserType> {
   const res = await fetch("http://localhost:8000/api/profile", {
     credentials: "include",
   });
 
-  if (!res.ok) throw new Error("Could not load profile");
+  if (res.status === 401) {
+    throw new Error("UNAUTHORIZED");
+  }
+
+  if (!res.ok) {
+    throw new Error("Could not load profile");
+  }
 
   return res.json();
 }
@@ -163,7 +157,7 @@ export async function updateMe(formData: FormData) {
       updatePayload.avatar = media["@id"];
     }
 
-    ["password", "firstName", "lastName", "birthDate", "alias"].forEach((key) => {
+    ["password", "firstName", "lastName", "birthDate", "alias", "color"].forEach((key) => {
       if (formData.has(key)) {
         updatePayload[key] = formData.get(key) || null;
       }
@@ -458,130 +452,6 @@ export async function fetchFamilyPosts(): Promise<{ data: PostType[] | null; err
 }
 
 
-//   try {
-//     const imageFiles = formData.getAll("image") as File[];
-//     const imageIris: string | null = null;
-
-//     // Upload all image files
-//     for (const file of imageFiles) {
-//       if (!(file instanceof File)) continue;
-
-//       const imageData = new FormData();
-//       imageData.append("file", file);
-
-//       const res = await fetch("http://localhost:8000/api/media_objects", {
-//         method: "POST",
-//         body: imageData,
-//         credentials: "include",
-//       });
-
-//       if (!res.ok) {
-//         const error = await res.json();
-//         return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
-//       }
-
-//       const media = await res.json();
-//       imageIris.push(media["@id"]);
-//     }
-
-//     // Upload video file (if any)
-//     const videoFile = formData.get("video") as File | null;
-//     let videoIri: string | null = null;
-
-//     if (videoFile instanceof File) {
-//       const videoData = new FormData();
-//       videoData.append("file", videoFile);
-
-//       const res = await fetch("http://localhost:8000/api/media_objects", {
-//         method: "POST",
-//         body: videoData,
-//         credentials: "include",
-//       });
-
-//       if (!res.ok) {
-//         const error = await res.json();
-//         return { error: `Video upload failed: ${error.message || JSON.stringify(error)}` };
-//       }
-
-//       const media = await res.json();
-//       videoIri = media["@id"];
-//     }
-
-//     // Prepare the post payload
-//     const postPayload = {
-//       title: formData.get("title"),
-//       content: formData.get("content"),
-//       images: imageIris,
-//       video: videoIri,
-//     };
-
-//     // Create the post
-//     const res = await fetch("http://localhost:8000/api/posts", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       credentials: "include",
-//       body: JSON.stringify(postPayload),
-//     });
-
-//     const data = await res.json();
-//     return res.ok ? { data } : { error: data.message || JSON.stringify(data) };
-//   } catch (err) {
-//     return { error: err instanceof Error ? err.message : "Network error" };
-//   }
-// }
-// // === FETCH FAMILY POSTS ===
-// export async function fetchFamilyPosts(): Promise<{ data: PostType[] | null; error: string | null }> {
-//   try {
-//     const user = await fetchMe();
-//     const userId = user.id;
-
-//     const familyMembersRes = await fetch(`http://localhost:8000/api/family_members?user=${userId}`, {
-//       credentials: "include",
-//     });
-
-//     if (!familyMembersRes.ok) {
-//       return { data: null, error: "Failed to fetch family memberships." };
-//     }
-
-//     const familyMembersJson = await familyMembersRes.json();
-//     const familyMembers = familyMembersJson['member'] || [];
-
-//     if (familyMembers.length === 0) {
-//       return { data: null, error: "User is not linked to a family." };
-//     }
-
-//     let familyId;
-
-//     if (typeof familyMembers[0].family === "string") {
-//       familyId = familyMembers[0].family.split("/").pop();
-//     } else if (typeof familyMembers[0].family === "object" && familyMembers[0].family.id) {
-//       familyId = familyMembers[0].family.id;
-//     }
-
-//     if (!familyId) {
-//       return { data: null, error: "Family ID missing in membership." };
-//     }
-
-//     const postsRes = await fetch(`http://localhost:8000/api/posts?family.id=${familyId}`, {
-//       credentials: "include",
-//     });
-
-//     const posts = await postsRes.json();
-
-//     if (!postsRes.ok) {
-//       return { data: null, error: posts.message || "Failed to fetch posts." };
-//     }
-
-//     return { data: posts["hydra:member"] ?? [], error: null };
-//   } catch (err) {
-//     return {
-//       data: null,
-//       error: err instanceof Error ? err.message : "Unknown error fetching posts.",
-//     };
-//   }
-// }
-// 
-
 export async function togglePostLike(postId: number) {
   try {
     const user = await fetchMe();
@@ -807,412 +677,84 @@ export async function postComment(payload: CreateCommentPayload) {
   }
 }
 
-
-// export interface CreateCommentPayload {
-//   postId: number;
-//   content: string;
-//   parentId?: number; // optional, for replying to another comment
-// }
-
-// export async function postComment(payload: CreateCommentPayload) {
-//   const response = await fetch('/api/post_comments', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//     credentials: 'include', // if using cookie-based auth
-//     body: JSON.stringify({
-//       post: `/api/posts/${payload.postId}`,
-//       content: payload.content,
-//       ...(payload.parentId && { parent: `/api/post_comments/${payload.parentId}` }),
-//     }),
-//   });
-
-//   if (!response.ok) {
-//     const errorData = await response.json();
-//     throw new Error(errorData?.hydra:description || 'Failed to post comment');
-//   }
-
-//   return await response.json();
-// }
-
-
-
-// export async function updatePost(postId: number, formData: FormData) {
-//   try {
-//     const API_URL = "http://localhost:8000";
-
-//     // Fetch existing post
-//     const existingPostRes = await fetch(`${API_URL}/api/posts/${postId}`, {
-//       credentials: "include",
-//     });
-
-//     if (!existingPostRes.ok) {
-//       const error = await existingPostRes.json();
-//       return { error: `Failed to fetch post: ${error.message || JSON.stringify(error)}` };
-//     }
-
-//     const existingPost = await existingPostRes.json();
-//     const oldImageIris: string | null = existingPost.images?.["@id"] || null;
-//     const oldVideoIri: string | null = existingPost.video?.["@id"] || null;
-
-//     const newImageIris: string[] = [];
-
-//     // Upload new images
-//     const imageFiles = formData.getAll("image") as File[];
-//     if (imageFiles.length > 0 && imageFiles[0].name !== "") {
-//       for (const file of imageFiles) {
-//         const imageData = new FormData();
-//         imageData.append("file", file);
-
-//         const uploadRes = await fetch(`${API_URL}/api/media_objects`, {
-//           method: "POST",
-//           body: imageData,
-//           credentials: "include",
-//         });
-
-//         if (!uploadRes.ok) {
-//           const error = await uploadRes.json();
-//           return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
-//         }
-
-//         const media = await uploadRes.json();
-//         const mediaIri = media["@id"];
-//         newImageIris.push(mediaIri);
-
-//         // Patch media object to link to post
-//         const patchMediaRes = await fetch(`${API_URL}${mediaIri}`, {
-//           method: "PATCH",
-//           headers: { "Content-Type": "application/merge-patch+json" },
-//           credentials: "include",
-//           body: JSON.stringify({ post: `/api/posts/${postId}` }),
-//         });
-
-//         if (!patchMediaRes.ok) {
-//           const error = await patchMediaRes.json();
-//           console.warn("Failed to link media to post:", error);
-//         }
-//       }
-//     }
-
-//     // Upload new video
-//     let newVideoIri: string | null = null;
-//     const videoFile = formData.get("video") as File | null;
-
-//     if (videoFile && videoFile.name !== "") {
-//       const videoData = new FormData();
-//       videoData.append("file", videoFile);
-
-//       const uploadRes = await fetch(`${API_URL}/api/media_objects`, {
-//         method: "POST",
-//         body: videoData,
-//         credentials: "include",
-//       });
-
-//       if (!uploadRes.ok) {
-//         const error = await uploadRes.json();
-//         return { error: `Video upload failed: ${error.message || JSON.stringify(error)}` };
-//       }
-
-//       const media = await uploadRes.json();
-//       newVideoIri = media["@id"];
-
-//       const patchVideoRes = await fetch(`${API_URL}${newVideoIri}`, {
-//         method: "PATCH",
-//         headers: { "Content-Type": "application/merge-patch+json" },
-//         credentials: "include",
-//         body: JSON.stringify({ post: `/api/posts/${postId}` }),
-//       });
-
-//       if (!patchVideoRes.ok) {
-//         const error = await patchVideoRes.json();
-//         console.warn("Failed to link video to post:", error);
-//       }
-//     }
-
-//     // Build patch payload
-//     const patchPayload: Record<string, unknown> = {};
-//     const title = formData.get("title");
-//     if (title) patchPayload.title = title;
-
-//     const content = formData.get("content");
-//     if (content) patchPayload.content = content;
-
-//     if (newImageIris.length > 0) {
-//       patchPayload.images = newImageIris;
-//     }
-
-//     if (newVideoIri !== null) {
-//       patchPayload.video = newVideoIri;
-//     }
-
-//     const hasChanges = Object.keys(patchPayload).length > 0;
-//     if (!hasChanges) {
-//       return { error: "No changes to update." };
-//     }
-
-//     // Update post with new data
-//     const patchPostRes = await fetch(`${API_URL}/api/posts/${postId}`, {
-//       method: "PATCH",
-//       headers: { "Content-Type": "application/merge-patch+json" },
-//       credentials: "include",
-//       body: JSON.stringify(patchPayload),
-//     });
-
-//     if (!patchPostRes.ok) {
-//       const error = await patchPostRes.json();
-//       return { error: error.message || JSON.stringify(error) };
-//     }
-
-//     // Delete old images if new ones were uploaded
-//     if (newImageIris.length > 0) {
-//       for (const iri of oldImageIris) {
-//         await fetch(`${API_URL}${iri}`, {
-//           method: "DELETE",
-//           credentials: "include",
-//         });
-//       }
-//     }
-
-//     // Delete old video if replaced
-//     if (newVideoIri && oldVideoIri && newVideoIri !== oldVideoIri) {
-//       await fetch(`${API_URL}${oldVideoIri}`, {
-//         method: "DELETE",
-//         credentials: "include",
-//       });
-//     }
-
-//     const updatedPost = await patchPostRes.json();
-//     return { data: updatedPost };
-//   } catch (err) {
-//     return { error: err instanceof Error ? err.message : "Unexpected error" };
-//   }
-// }
-
-// export async function updatePost(postId: number, formData: FormData) {
-//   try {
-//     // 1. Fetch the existing post to get current media
-//     const existingPostRes = await fetch(`http://localhost:8000/api/posts/${postId}`, {
-//       credentials: "include",
-//     });
-
-//     if (!existingPostRes.ok) {
-//       const error = await existingPostRes.json();
-//       return { error: `Failed to fetch post: ${error.message || JSON.stringify(error)}` };
-//     }
-
-//     const existingPost = await existingPostRes.json();
-//     const existingImageIris: string[] = existingPost.images?.map((img: any) => img["@id"]) || [];
-//     const existingVideoIri: string | null = existingPost.video?.["@id"] || null;
-
-//     const newImageIris: string[] = [];
-
-//     // 2. Upload new images and attach them to the post
-//     const imageFiles = formData.getAll("image") as File[];
-//     if (imageFiles.length > 0) {
-//       for (const file of imageFiles) {
-//         if (!(file instanceof File)) continue;
-
-//         const imageData = new FormData();
-//         imageData.append("file", file);
-
-//         const uploadRes = await fetch("http://localhost:8000/api/media_objects", {
-//           method: "POST",
-//           body: imageData,
-//           credentials: "include",
-//         });
-
-//         if (!uploadRes.ok) {
-//           const error = await uploadRes.json();
-//           return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
-//         }
-
-//         const media = await uploadRes.json();
-
-//         // Attach media to post
-//         await fetch(media["@id"], {
-//           method: "PATCH",
-//           headers: { "Content-Type": "application/merge-patch+json" },
-//           credentials: "include",
-//           body: JSON.stringify({ post: `/api/posts/${postId}` }),
-//         });
-
-//         newImageIris.push(media["@id"]);
-//       }
-
-//       // Delete old images
-//       for (const iri of existingImageIris) {
-//         await fetch(`http://localhost:8000${iri}`, {
-//           method: "DELETE",
-//           credentials: "include",
-//         });
-//       }
-//     }
-
-//     // 3. Upload new video and attach to the post
-//     let newVideoIri: string | null = null;
-//     const videoFile = formData.get("video") as File | null;
-
-//     if (videoFile instanceof File) {
-//       const videoData = new FormData();
-//       videoData.append("file", videoFile);
-
-//       const uploadRes = await fetch("http://localhost:8000/api/media_objects", {
-//         method: "POST",
-//         body: videoData,
-//         credentials: "include",
-//       });
-
-//       if (!uploadRes.ok) {
-//         const error = await uploadRes.json();
-//         return { error: `Video upload failed: ${error.message || JSON.stringify(error)}` };
-//       }
-
-//       const media = await uploadRes.json();
-
-//       // Attach video to post
-//       await fetch(media["@id"], {
-//         method: "PATCH",
-//         headers: { "Content-Type": "application/merge-patch+json" },
-//         credentials: "include",
-//         body: JSON.stringify({ post: `/api/posts/${postId}` }),
-//       });
-
-//       newVideoIri = media["@id"];
-
-//       // Delete old video
-//       if (existingVideoIri) {
-//         await fetch(`http://localhost:8000${existingVideoIri}`, {
-//           method: "DELETE",
-//           credentials: "include",
-//         });
-//       }
-//     }
-
-//     // 4. Build patch payload for other fields
-//     const patchPayload: Record<string, unknown> = {};
-//     const title = formData.get("title");
-//     if (title) patchPayload.title = title;
-
-//     const content = formData.get("content");
-//     if (content) patchPayload.content = content;
-
-//     // Only include new media in patch payload
-//     if (newImageIris.length > 0) patchPayload.images = newImageIris;
-//     if (newVideoIri !== null) patchPayload.video = newVideoIri;
-
-//     if (Object.keys(patchPayload).length === 0) {
-//       return { error: "No changes to update." };
-//     }
-
-//     // 5. Send PATCH request to update the post
-//     const updateRes = await fetch(`http://localhost:8000/api/posts/${postId}`, {
-//       method: "PATCH",
-//       headers: { "Content-Type": "application/merge-patch+json" },
-//       credentials: "include",
-//       body: JSON.stringify(patchPayload),
-//     });
-
-//     if (!updateRes.ok) {
-//       const error = await updateRes.json();
-//       return { error: error.message || JSON.stringify(error) };
-//     }
-
-//     const updatedPost = await updateRes.json();
-//     return { data: updatedPost };
-//   } catch (err) {
-//     return { error: err instanceof Error ? err.message : "Network error" };
-//   }
-// }
-
-
-
-
-// export async function updatePost(postId: number, formData: FormData) {
-//   try {
-//     // 1. Upload new images if any
-//     const imageFiles = formData.getAll("image") as File[];
-//     const imageIris: string[] = [];
-
-//     for (const file of imageFiles) {
-//       if (!(file instanceof File)) continue;
-
-//       const imageData = new FormData();
-//       imageData.append("file", file);
-
-//       const res = await fetch("http://localhost:8000/api/media_objects", {
-//         method: "POST",
-//         body: imageData,
-//         credentials: "include",
-//       });
-
-//       if (!res.ok) {
-//         const error = await res.json();
-//         return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
-//       }
-
-//       const media = await res.json();
-//       imageIris.push(media["@id"]);
-//     }
-
-//     // 2. Upload new video if any
-//     const videoFile = formData.get("video") as File | null;
-//     let videoIri: string | null = null;
-
-//     if (videoFile instanceof File) {
-//       const videoData = new FormData();
-//       videoData.append("file", videoFile);
-
-//       const res = await fetch("http://localhost:8000/api/media_objects", {
-//         method: "POST",
-//         body: videoData,
-//         credentials: "include",
-//       });
-
-//       if (!res.ok) {
-//         const error = await res.json();
-//         return { error: `Video upload failed: ${error.message || JSON.stringify(error)}` };
-//       }
-
-//       const media = await res.json();
-//       videoIri = media["@id"];
-//     }
-
-//     // 3. Build patch payload with optional fields
-//     const patchPayload: Record<string, unknown> = {};
-
-//     const title = formData.get("title");
-//     if (title) patchPayload.title = title;
-
-//     const content = formData.get("content");
-//     if (content) patchPayload.content = content;
-
-//     if (imageIris.length > 0) patchPayload.images = imageIris;
-//     if (videoIri !== null) patchPayload.video = videoIri;
-
-//     if (Object.keys(patchPayload).length === 0) {
-//       return { error: "No changes to update." };
-//     }
-
-//     // 4. Send PATCH request to update the post
-//     const res = await fetch(`http://localhost:8000/api/posts/${postId}`, {
-//       method: "PATCH",
-//       headers: { "Content-Type": "application/merge-patch+json" },
-//       credentials: "include",
-//       body: JSON.stringify(patchPayload),
-//     });
-
-//     if (!res.ok) {
-//       const error = await res.json();
-//       return { error: error.message || JSON.stringify(error) };
-//     }
-
-//     const updatedPost = await res.json();
-
-//     // OPTIONAL: You can fetch the old post before updating and delete replaced media similar to your updateMe function here
-
-//     return { data: updatedPost };
-//   } catch (err) {
-//     return { error: err instanceof Error ? err.message : "Network error" };
-//   }
-// }
+export async function updateComment(commentId: number, content: string) {
+  try {
+    const response = await fetch(`http://localhost:8000/api/post_comments/${commentId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/merge-patch+json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ content }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const message =
+        errorData.message || errorData.detail || 'Unable to update comment.';
+      throw { status: response.status, message } as ApiError;
+    }
+
+    return await response.json();
+  } catch (error: any) {
+    throw {
+      status: error.status || 500,
+      message: error.message || 'An unexpected error occurred.',
+    } as ApiError;
+  }
+}
+
+export async function deleteComment(commentId: number) {
+  try {
+    const response = await fetch(`http://localhost:8000/api/post_comments/${commentId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const message =
+        errorData.message || errorData.detail || 'Unable to delete comment.';
+      throw { status: response.status, message } as ApiError;
+    }
+
+    return true;
+  } catch (error: any) {
+    throw {
+      status: error.status || 500,
+      message: error.message || 'An unexpected error occurred.',
+    } as ApiError;
+  }
+}
+
+export async function createFamilyInvitation({
+  email,
+  sendEmail = false,
+}: { email?: string; sendEmail?: boolean } = {}) {
+  const { data: family, error } = await fetchMyFamily();
+
+  if (error || !family?.id) {
+    throw new Error(error || "Failed to determine user's family.");
+  }
+
+  const res = await fetch("http://localhost:8000/api/family-invitations", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      family: `/api/families/${family.id}`,
+      email,
+      sendEmail,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Error details:", errorText);
+    throw new Error("Failed to create family invitation");
+  }
+
+  return res.json();
+}
