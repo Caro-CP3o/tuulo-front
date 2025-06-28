@@ -6,6 +6,7 @@ import Image from "next/image";
 import { hasRole } from "@/helpers/auth";
 import type { UserType } from "@/types/api";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function ProfilePage() {
   // ---------------------------
@@ -24,6 +25,7 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
+  const { refresh } = useAuth();
 
   // ---------------------------
   // Fetch user profile on mount
@@ -52,10 +54,18 @@ export default function ProfilePage() {
   // ---------------------------
   // Redirect to home if user is not authorized
   // ---------------------------
-  if (!user) return null;
-  if (!hasRole(user, "ROLE_USER")) {
-    router.push("/");
-    return null;
+  useEffect(() => {
+    if (user && !hasRole(user, "ROLE_USER")) {
+      router.push("/");
+    }
+  }, [user, router]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <div>Failed to load profile</div>;
   }
 
   // ---------------------------
@@ -97,6 +107,9 @@ export default function ProfilePage() {
       if (avatar) setCurrentAvatarUrl(previewUrl);
       setOldPassword("");
       setNewPassword("");
+
+      refresh();
+      router.push("/home");
     }
 
     setLoading(false);

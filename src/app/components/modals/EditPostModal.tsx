@@ -80,26 +80,6 @@ export default function EditPostModal({
             </div>
           )}
 
-          {/* preview of new image/video */}
-          {file && isImageFile && (
-            <div className="relative w-full aspect-[3/2] rounded overflow-hidden">
-              <Image
-                src={URL.createObjectURL(file)}
-                alt="Image sélectionnée"
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
-          )}
-          {file && isVideoFile && (
-            <video
-              src={URL.createObjectURL(file)}
-              controls
-              className="w-full rounded"
-            />
-          )}
-
           <div className="flex justify-end gap-2 mt-4">
             <button
               onClick={() =>

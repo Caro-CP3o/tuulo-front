@@ -26,8 +26,6 @@ export default function SidebarContent({
   const displayName = user.alias || `${user.firstName} ${user.lastName}`;
   const router = useRouter();
   const { setUser } = useAuth();
-  // const role = user.roles;
-  // console.log("role", role);
   // ---------------------------
   // Logout handler
   // ---------------------------
