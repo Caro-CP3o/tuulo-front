@@ -16,6 +16,7 @@
     "next": "15.3.2",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
+    "react-cookie-consent": "^9.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.4",
     "zod": "^3.25.28"

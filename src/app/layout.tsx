@@ -1,20 +1,10 @@
 import type { Metadata } from "next";
-// import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-// import SidebarMenu from "./components/organisms/menu/SidebarMenu";
 import TopMenu from "./components/organisms/menu/TopMenu";
 import { AuthProvider } from "@/app/context/AuthContext";
-// import Banner from "./components/atoms/Banner";
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
+import Footer from "./components/molecules/Footer";
+import CookieBanner from "./components/atoms/CookieBanner";
+import { ErrorPageProvider } from "./context/ErrorPageContext";
 
 export const metadata: Metadata = {
   title: "Tuulo",
@@ -28,33 +18,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen">
-        <div className="fixed top-0 left-0 w-full z-[9999]">
-          <TopMenu />
-        </div>
-        <main className="flex flex-col min-h-screen items-center justify-center px-4 mt-8">
-          <AuthProvider>{children}</AuthProvider>
-        </main>
+      <body className="antialiased min-h-screen flex flex-col">
+        <ErrorPageProvider>
+          <AuthProvider>
+            <div className="w-full z-[9988] sticky top-0">
+              <TopMenu />
+            </div>
+            <main className="flex flex-col justify-center items-center flex-1">
+              {children}
+            </main>
+            <Footer />
+          </AuthProvider>
+        </ErrorPageProvider>
+
+        <CookieBanner />
       </body>
     </html>
   );
 }
-
-// return (
-//   <html lang="en">
-//     <body
-//       className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
-//     >
-//       <div className="fixed top-0 left-0 right-0 w-full z-[9999]">
-//         <TopMenu />
-//         <Banner />
-//       </div>
-//       <div className="grid grid-cols-4 min-h-screen mx-auto">
-//         <div className="col-span-1 pt-[300px] min-h-screen">
-//           <SidebarMenu />
-//         </div>
-//         <main className="col-span-3 mt-[364px]">{children}</main>
-//       </div>
-//     </body>
-//   </html>
-// );

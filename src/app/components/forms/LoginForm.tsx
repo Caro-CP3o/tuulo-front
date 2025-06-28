@@ -2,67 +2,79 @@
 
 import { useState } from "react";
 import { login } from "@/lib/api";
+import { useAuth } from "@/app/context/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginForm() {
+  // ---------------------------
+  // State variables
+  // ---------------------------
   const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Refresh context after loggin
+  const { refresh } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
     try {
       await login(form);
-      window.location.href = "/home"; // reload to reflect auth state
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unknown error occurred.");
-      }
+      await refresh();
+    } catch (err: any) {
+      setError(
+        err instanceof Error ? err.message : "Une erreur inconnue est survenue."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-sm space-y-4"
-    >
-      <h2 className="text-xl font-bold text-center">Log in to Tuulo</h2>
-      {error && <p className="text-red-600 text-sm text-center">{error}</p>}
+    <form onSubmit={handleSubmit} className="flex gap-2 items-center flex-wrap">
       <input
         type="email"
         name="email"
+        placeholder="Email"
+        className="border px-2 py-1 rounded"
         value={form.email}
         onChange={handleChange}
-        placeholder="Email"
         required
-        className="w-full px-4 py-2 border rounded-xl"
       />
-      <input
-        type="password"
-        name="password"
-        value={form.password}
-        onChange={handleChange}
-        placeholder="Password"
-        required
-        className="w-full px-4 py-2 border rounded-xl"
-      />
+      {/* Password field with toggle */}
+      <div className="relative">
+        <input
+          type={showPassword ? "text" : "password"}
+          name="password"
+          placeholder="Mot de passe"
+          className="border px-2 py-1 rounded pr-10 w-full"
+          value={form.password}
+          onChange={handleChange}
+          required
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword((prev) => !prev)}
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+        >
+          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      </div>
       <button
         type="submit"
-        className="w-full py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition"
+        className="bg-blue-900 text-white px-3 py-1 rounded hover:bg-red-400"
         disabled={loading}
       >
-        {loading ? "Logging in…" : "Log In"}
+        {loading ? "En cours…" : "Se connecter"}
       </button>
+      {error && <p className="text-red-400 text-sm ml-2">{error}</p>}
     </form>
   );
 }

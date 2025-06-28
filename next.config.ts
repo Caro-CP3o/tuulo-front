@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
+// ---------------------------
+// URLS REWRITE
+// ---------------------------
 const nextConfig: NextConfig = {
-  /* config options here */
   async rewrites() {
     return [
       {
@@ -24,6 +26,10 @@ const nextConfig: NextConfig = {
         source: '/settings',
         destination: '/auth/settings',
       },
+      {
+        source: '/verified',
+        destination: '/auth/verified-email',
+      },
     ];
   },
   images: {
@@ -37,7 +43,5 @@ const nextConfig: NextConfig = {
     ],
   },
 };
-
-
 
 export default nextConfig;

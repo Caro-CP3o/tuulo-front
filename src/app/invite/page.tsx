@@ -2,19 +2,32 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-
+// ---------------------------
+// Link from invitation email with code
+// ---------------------------
 export default function InvitePage() {
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
+  // ---------------------------
+  // State variables
+  // ---------------------------
   const [loading, setLoading] = useState(true);
   const [valid, setValid] = useState<boolean | null>(null);
+  const [familyName, setFamilyName] = useState<string>("");
 
+  // ---------------------------
+  // Effect load invite code
+  // ---------------------------
   useEffect(() => {
     if (code) {
-      // Optional: validate code with backend
-      fetch(`http://localhost:8000/api/validate-invitation?code=${code}`)
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/validate-invitation?code=${code}`
+      )
         .then((res) => (res.ok ? res.json() : Promise.reject()))
-        .then(() => setValid(true))
+        .then((data) => {
+          setValid(true);
+          setFamilyName(data.family?.name || "Inconnue");
+        })
         .catch(() => setValid(false))
         .finally(() => setLoading(false));
     } else {
@@ -23,23 +36,25 @@ export default function InvitePage() {
     }
   }, [code]);
 
-  if (loading) return <p className="p-4">Loading invitation...</p>;
+  if (loading) return <p className="p-4">Chargement de l&apos;invitation...</p>;
+
   if (!valid)
-    return (
-      <p className="p-4 text-red-600">Invalid or expired invitation code.</p>
-    );
+    return <p className="p-4 text-red-600">Invitation invalide ou expirée.</p>;
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">🎉 You’ve been invited!</h1>
+    <div className="p-6 max-w-xl mx-auto text-center !space-y-4">
+      <h1 className="text-2xl font-bold mb-4">
+        🎉 Vous avez été invité à rejoindre la famille{" "}
+        <span className="text-red-400 satisfy text-3xl">{familyName}</span>
+      </h1>
       <p className="mb-4">
-        Invitation code: <strong>{code}</strong>
+        Code d&apos;invitation: <strong>{code}</strong>
       </p>
       <a
         href={`/register?code=${code}`}
-        className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        className="inline-block bg-blue-900 text-white px-4 py-2 rounded hover:bg-red-400"
       >
-        Accept Invitation
+        Accepter l&apos;invitation
       </a>
     </div>
   );

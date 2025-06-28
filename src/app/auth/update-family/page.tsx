@@ -9,20 +9,25 @@ interface UpdateFamilyPageProps {
 }
 
 export default function UpdateFamilyPage({ familyId }: UpdateFamilyPageProps) {
+  // ---------------------------
+  // State variables
+  // ---------------------------
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  // ---------------------------
+  // Fetch family on mount
+  // ---------------------------
   useEffect(() => {
     const fetchData = async () => {
-      const { data, error } = await getFamilyById(familyId);
-      if (data) {
+      try {
+        const data = await getFamilyById(familyId);
         setName(data.name || "");
         setDescription(data.description || "");
-        // coverImage is not preloaded as a file
-      } else if (error) {
+      } catch (e) {
         setError("Failed to load family data.");
       }
     };
@@ -30,22 +35,24 @@ export default function UpdateFamilyPage({ familyId }: UpdateFamilyPageProps) {
     fetchData();
   }, [familyId]);
 
+  // ---------------------------
+  // Handle form submission
+  // ---------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
+    // Build form data to send only changed fields
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description);
     if (coverImage) formData.append("coverImage", coverImage);
 
-    // const { error } = await updateFamily(familyId, formData);
-
     if (error) {
       setError(error);
     } else {
       alert("Family updated successfully!");
-      router.push("/home"); // or redirect as needed
+      router.push("/home");
     }
   };
 

@@ -4,33 +4,45 @@ import { useEffect, useState } from "react";
 import { fetchMe, fetchMyFamily } from "@/lib/api";
 import { FamilyType, UserType } from "@/types/api";
 import { hasRole } from "@/helpers/auth";
-// import { User, Family } from "@/types"; // Optional if you want to define types
-import {
-  UserCircle,
-  MessageSquareText,
-  Settings,
-  Notebook,
-  Home,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import SidebarContent from "./SidebarContent";
+import { X } from "lucide-react";
 
 export default function SidebarMenu() {
+  // ---------------------------
+  // State variables
+  // ---------------------------
   const [user, setUser] = useState<UserType | null>(null);
   const [family, setFamily] = useState<FamilyType | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isShortScreen, setIsShortScreen] = useState(false);
 
+  // ---------------------------
+  // Effect check width & height on mount
+  // ---------------------------
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 898);
+      setIsShortScreen(window.innerHeight < 771);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // ---------------------------
+  // Effect load family on mount
+  // ---------------------------
   useEffect(() => {
     async function loadData() {
+      // API call fetch user & family
       try {
         const me = await fetchMe();
+        const { data: familyData } = await fetchMyFamily();
         setUser(me);
-
-        // if (me.family && typeof me.family === "object" && me.family.id) {
-        //   const { data } = await fetchMyFamily();
-        //   setFamily(data);
-        // }
-        const { data } = await fetchMyFamily();
-        setFamily(data);
+        setFamily(familyData);
       } catch (err) {
         console.error("Failed to load sidebar data:", err);
       }
@@ -38,101 +50,60 @@ export default function SidebarMenu() {
     loadData();
   }, []);
 
-  if (!user) return null;
-
-  if (!user || !hasRole(user, "ROLE_USER")) {
-    return null;
-  }
-
-  //   const avatarUrl = typeof user.avatar === "object" ? user.avatar : user.avatar;
-  const avatarUrl =
-    typeof user.avatar === "object" && user.avatar?.contentUrl
-      ? `http://localhost:8000${user.avatar.contentUrl}`
-      : typeof user.avatar === "string"
-      ? `http://localhost:8000${user.avatar}`
-      : null;
-
-  const displayName = user.alias || `${user.firstName} ${user.lastName}`;
-  const borderColor = user.color || "#ccc";
+  // Guard not authenticated
+  if (!user || !hasRole(user, "ROLE_USER")) return null;
 
   return (
-    <aside className="fixed pt-16 px-[45px] bg-white border-r border-gray-200 flex flex-col items-center justify-center min-h-screen">
-      <div className="relative w-24 h-24 mb-4">
-        {/* Star: Top right */}
-        <Image
-          src="/star.png"
-          alt="star"
-          className="absolute top-0 right-[-9px] w-6 h-6"
-          width={6}
-          height={6}
-        />
-        {/* Avatar */}
-        {avatarUrl ? (
-          <div
-            className="w-24 h-24 rounded-full overflow-hidden border-[5px] mb-4"
-            style={{ borderColor }}
+    <>
+      {/* Desktop Sidebar */}
+      {!(isMobile || isShortScreen) && (
+        <aside className="sticky top-10 self-start max-h-[calc(100vh-2rem)] bg-white p-4">
+          <SidebarContent user={user} family={family} />
+        </aside>
+      )}
+
+      {/* Mobile hamburger */}
+      {(isMobile || isShortScreen) && (
+        <div className=" fixed top-4 left-4 z-[9999]">
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="p-2 rounded-md bg-white border border-gray-300 shadow"
           >
-            <Image
-              src={avatarUrl}
-              alt="User avatar"
-              width={96}
-              height={96}
-              className="object-cover w-full h-full"
-              unoptimized
-            />
-          </div>
-        ) : (
-          <div
-            className="w-24 h-24 rounded-full overflow-hidden border-[5px] mb-4 bg-gray-200 flex items-center justify-center"
-            style={{ borderColor }}
+            <span className="sr-only">Open menu</span>
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Sidebar */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-blue-900/50 z-[9999]"
+          onClick={() => setMobileOpen(false)}
+        >
+          <aside
+            className="absolute left-0 top-0 w-full h-full bg-white p-6 shadow-lg z-50"
+            onClick={(e) => e.stopPropagation()}
           >
-            No Avatar
-          </div>
-        )}
-        {/* Star: Bottom left */}
-        <Image
-          src="/star.png"
-          alt="star"
-          className="absolute bottom-0 left-[-9px] w-6 h-6"
-          width={6}
-          height={6}
-        />
-      </div>
-      {/* User Name */}
-      <div className="satisfy text-2xl text-center mb-5">{displayName}</div>
-
-      {/* Menu Section Title */}
-      <div className="uppercase mb-6 text-sm font-semibold  text-center">
-        <h1>La famille {family?.name || "Your Family"}</h1>
-      </div>
-
-      {/* Menu Items */}
-      <nav className="flex flex-col space-y-4 w-full text-center">
-        <Link href="/home">
-          <MenuItem icon={<Home size={20} />} label="Home" />
-        </Link>
-        <Link href="/profile">
-          <MenuItem icon={<UserCircle size={20} />} label="Profile" />
-        </Link>
-        <Link href="#">
-          <MenuItem icon={<Notebook size={20} />} label="Notes" />
-        </Link>
-        <Link href="#">
-          <MenuItem icon={<MessageSquareText size={20} />} label="Messages" />
-        </Link>
-        <Link href="settings">
-          <MenuItem icon={<Settings size={20} />} label="Settings" />
-        </Link>
-      </nav>
-    </aside>
-  );
-}
-
-function MenuItem({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="flex items-center space-x-3 hover:text-red-400 cursor-pointer justify-start">
-      {icon}
-      <span className="text-md font-medium hover:text-red-400">{label}</span>
-    </div>
+            <button className="mb-4" onClick={() => setMobileOpen(false)}>
+              <X />
+            </button>
+            <SidebarContent user={user} family={family} />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

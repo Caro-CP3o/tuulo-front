@@ -23,28 +23,11 @@
 :root {
   --neutral: #ffffff;
   --blue: #001962;
-  /* --tuulo: #001962; */
+  --pink: #ff917e;
 
   --font-sans: "WorkSans", system-ui, sans-serif;
   --font-handwriting: "Satisfy", cursive;
 }
-/* @layer base {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  p,
-  span,
-  label,
-  input,
-  button,
-  a,
-  div {
-    color: var(--blue);
-  }
-} */
 
 @layer utilities {
   .bg-custom {
@@ -66,39 +49,22 @@
   .bg-blue-900 {
     background-color: #001962;
   }
+  .bg-yellow-400 {
+    background-color: #ffb95c;
+  }
+  .hover\:bg-red-400:hover {
+    background-color: var(--pink) !important;
+  }
 }
-/* @layer components {
-  .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50;
-  }
-
-  .btn-secondary {
-    @apply bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300;
-  }
-} */
-
-/* @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-} */
-
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --neutral: #ffffff;
-    --blue: #393939;
-  }
-} */
 
 body {
+  overflow-x: hidden;
   background: var(--neutral);
   color: var(--blue);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 h1 {
   font-family: var(--font-sans);
-  font-size: 2rem;
   font-weight: 600;
   line-height: 1.2;
   margin: 0;
@@ -106,4 +72,23 @@ h1 {
   text-align: center;
   letter-spacing: 0.05em;
   color: var(--blue);
+}
+/* color input from ColorPicker component */
+.color-used::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: #00000088;
+  transform: rotate(45deg);
+  top: 50%;
+  left: 0;
+}
+
+/* Main layout responsive breakpoint */
+@media (min-width: 768px) and (max-width: 888px) {
+  .main-auth {
+    grid-column: 1 / -1;
+    margin-top: 0 !important;
+  }
 }
