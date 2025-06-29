@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteFamily, getFamilyById, updateFamily } from "@/lib/api";
-import CoverImagePicker from "../atoms/CoverImagePicker";
+// import CoverImagePicker from "../atoms/CoverImagePicker";
 import { FamilyType } from "@/types/api";
+import CoverImagePicker from "@/app/components/atoms/CoverImagePicker";
 
 interface UpdateFamilyFormProps {
   familyId: number;
@@ -62,9 +63,9 @@ export default function UpdateFamilyForm({
     try {
       await deleteFamily(familyId);
       router.push("/home");
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Impossible de supprimer la famille.");
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Impossible de supprimer la famille.");
     }
   };
 
@@ -111,9 +112,13 @@ export default function UpdateFamilyForm({
       } else {
         router.push("/home");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "Échec de la mise à jour de la famille.");
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Échec de la mise à jour de la famille.");
+      }
     } finally {
       setSubmitting(false);
     }

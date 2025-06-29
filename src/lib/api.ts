@@ -59,7 +59,7 @@ export async function registerUser(formData: FormData) {
 // ---------------------------
 export async function login(credentials: { email: string; password: string }) {
   let response: Response;
-  let data: any = null;
+  let data: unknown = null;
 
   try {
     response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
@@ -68,7 +68,7 @@ export async function login(credentials: { email: string; password: string }) {
       credentials: "include",
       body: JSON.stringify(credentials),
     });
-  } catch (err) {
+  } catch {
     throw new Error("Impossible de se connecter au serveur.");
   }
 
@@ -81,11 +81,20 @@ export async function login(credentials: { email: string; password: string }) {
   if (!response.ok) {
     let message = "Échec de la connexion.";
 
-    if (data?.error?.toLowerCase().includes("not verified")) {
+if (
+  typeof data === "object" &&
+  data !== null &&
+  "error" in data &&
+  typeof (data as Record<string, unknown>).error === "string"
+) {
+  const errorStr = (data as { error: string }).error.toLowerCase();
+
+    if (errorStr.includes("not verified")) {
       message = "Votre email n'a pas encore été vérifié.";
-    } else if (data?.error?.toLowerCase().includes("credentials")) {
+    } else if (errorStr.includes("credentials")) {
       message = "Email ou mot de passe incorrect.";
     }
+  }
 
     throw new Error(message);
   }
@@ -863,11 +872,20 @@ export async function postComment(payload: CreateCommentPayload) {
     }
 
     return await response.json();
-  } catch (error: any) {
-    throw {
-      status: error.status || 500,
-      message: error.message || 'An unexpected error occurred.',
-    } as ApiError;
+  } catch (error: unknown) {
+    // Narrow the error type safely:
+    if (typeof error === 'object' && error !== null && 'status' in error && 'message' in error) {
+      const err = error as { status?: number; message?: string };
+      throw {
+        status: err.status ?? 500,
+        message: err.message ?? 'An unexpected error occurred.',
+      } as ApiError;
+    } else {
+      throw {
+        status: 500,
+        message: 'An unexpected error occurred.',
+      } as ApiError;
+    }
   }
 }
 // ---------------------------
@@ -892,11 +910,19 @@ export async function updateComment(commentId: number, content: string) {
     }
 
     return await response.json();
-  } catch (error: any) {
-    throw {
-      status: error.status || 500,
-      message: error.message || 'An unexpected error occurred.',
-    } as ApiError;
+  } catch (error: unknown) {
+    if (typeof error === 'object' && error !== null && 'status' in error && 'message' in error) {
+      const err = error as { status?: number; message?: string };
+      throw {
+        status: err.status ?? 500,
+        message: err.message ?? 'An unexpected error occurred.',
+      } as ApiError;
+    } else {
+      throw {
+        status: 500,
+        message: 'An unexpected error occurred.',
+      } as ApiError;
+    }
   }
 }
 // ---------------------------
@@ -917,11 +943,19 @@ export async function deleteComment(commentId: number) {
     }
 
     return true;
-  } catch (error: any) {
-    throw {
-      status: error.status || 500,
-      message: error.message || 'An unexpected error occurred.',
-    } as ApiError;
+  } catch (error: unknown) {
+    if (typeof error === 'object' && error !== null && 'status' in error && 'message' in error) {
+      const err = error as { status?: number; message?: string };
+      throw {
+        status: err.status ?? 500,
+        message: err.message ?? 'An unexpected error occurred.',
+      } as ApiError;
+    } else {
+      throw {
+        status: 500,
+        message: 'An unexpected error occurred.',
+      } as ApiError;
+    }
   }
 }
 
@@ -949,7 +983,7 @@ export async function promoteFamilyMember(memberId: number) {
 
     const data = await response.json();
     return { success: true, message: data.message };
-  } catch (error) {
+  } catch {
     return { success: false, error: 'Erreur réseau ou serveur' };
   }
 }

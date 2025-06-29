@@ -100,13 +100,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           router.push("/create-family");
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching user:", err);
       setUser(null);
 
-      if (err.message === "UNAUTHORIZED" && pathname !== "/login") {
-        // router.push("/login");
-        return;
+      // To access err.message safely, you need to check if err is an Error
+      if (err instanceof Error) {
+        if (err.message === "UNAUTHORIZED" && pathname !== "/login") {
+          // router.push("/login");
+          return;
+        }
       }
     } finally {
       setLoading(false);

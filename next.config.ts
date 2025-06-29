@@ -19,8 +19,8 @@ const nextConfig: NextConfig = {
         destination: '/auth/profile-update',
       },
       {
-        source: '/update-family',
-        destination: '/auth/update-family',
+        source: '/update-family/:familyId',
+        destination: '/auth/update-family/:familyId',
       },
       {
         source: '/settings',
@@ -35,9 +35,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8000',
+        protocol: 'https',
+        hostname: 'api.tuulo.be',
+     
         pathname: '/media/**',
       },
     ],

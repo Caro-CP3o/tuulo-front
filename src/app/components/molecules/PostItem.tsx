@@ -49,6 +49,7 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  console.log("confirmdel: ", confirmDelete);
 
   const showAlert = (title: string, message: string) => {
     setAlertTitle(title);
@@ -297,7 +298,7 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
     try {
       await deleteComment(id);
       setComments((prev) => prev.filter((c) => c.id !== id));
-    } catch (error) {
+    } catch {
       showAlert("Erreur", "Erreur lors de la suppression du commentaire.");
     }
   };
@@ -316,7 +317,7 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
       );
       setEditingCommentId(null);
       setEditingContent("");
-    } catch (error) {
+    } catch {
       showAlert("Erreur", "Erreur lors de la modification du commentaire.");
     }
   };

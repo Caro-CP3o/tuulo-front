@@ -28,7 +28,7 @@ export default function LoginForm() {
     try {
       await login(form);
       await refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Une erreur inconnue est survenue."
       );

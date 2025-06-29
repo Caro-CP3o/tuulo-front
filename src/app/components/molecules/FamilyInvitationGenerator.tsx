@@ -29,8 +29,12 @@ export default function FamilyInvitationGenerator() {
     try {
       const invitation = await createFamilyInvitation({ sendEmail: false });
       setInvitationCode(invitation.code);
-    } catch (err: any) {
-      setError(err.message || "Failed to generate code.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to generate code.");
+      }
     } finally {
       setLoading(false);
     }
@@ -71,11 +75,15 @@ export default function FamilyInvitationGenerator() {
       });
       setInvitationCode(invitation.code);
       setEmailSent(true);
-    } catch (err: any) {
-      if (err.message?.includes("does not comply with addr-spec")) {
-        setError("L'adresse email est invalide.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        if (err.message.includes("does not comply with addr-spec")) {
+          setError("L'adresse email est invalide.");
+        } else {
+          setError(err.message || "Échec de l'envoi de l'invitation.");
+        }
       } else {
-        setError(err.message || "Échec de l'envoi de l'invitation.");
+        setError("Échec de l'envoi de l'invitation.");
       }
     } finally {
       setLoading(false);

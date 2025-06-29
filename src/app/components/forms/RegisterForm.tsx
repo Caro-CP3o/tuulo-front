@@ -8,7 +8,10 @@ import AvatarPicker from "../atoms/AvatarPicker";
 import PasswordField from "../molecules/PasswordField";
 
 // Function to debounce email inout
-function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
+function debounce<T extends (...args: unknown[]) => void>(
+  func: T,
+  wait: number
+) {
   let timeout: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);

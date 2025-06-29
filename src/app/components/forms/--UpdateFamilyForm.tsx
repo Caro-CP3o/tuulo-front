@@ -1,38 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getFamilyById } from "@/lib/api";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function UpdateFamilyPage() {
+interface Props {
+  familyId: number;
+  initialName: string;
+  initialDescription: string;
+}
+
+export default function UpdateFamilyForm({
+  familyId,
+  initialName,
+  initialDescription,
+}: Props) {
   // ---------------------------
   // State variables
   // ---------------------------
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription);
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  console.log(familyId);
 
-  // ---------------------------
-  // Fetch family on mount
-  // ---------------------------
-  useEffect(() => {
-    async function fetchFamily() {
-      try {
-        const data = await getFamilyById(1); // Replace 1 with actual family ID from URL params or context
-        setName(data.name);
-        setDescription(data?.description || "");
-      } catch {
-        setError("Impossible de charger les données de la famille.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchFamily();
-  }, []);
-  if (loading) return <p>Chargement...</p>;
   // ---------------------------
   // Handle form submission
   // ---------------------------
@@ -46,11 +37,12 @@ export default function UpdateFamilyPage() {
     formData.append("description", description);
     if (coverImage) formData.append("coverImage", coverImage);
 
-    if (error) {
-      setError(error);
-    } else {
+    try {
+      // await updateFamily(familyId, formData); // you should implement this
       alert("Family updated successfully!");
       router.push("/home");
+    } catch {
+      setError("Failed to update family.");
     }
   };
 

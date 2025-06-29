@@ -13,6 +13,7 @@ export default function CreateFamilyPage() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  console.log("Error", error);
 
   const router = useRouter();
 
@@ -33,7 +34,7 @@ export default function CreateFamilyPage() {
 
       alert("Compte supprimé avec succès.");
       router.push("/"); // Or "/login" if you want user to re-auth
-    } catch (err) {
+    } catch {
       setError("Une erreur est survenue lors de la suppression.");
     } finally {
       setLoading(false);
