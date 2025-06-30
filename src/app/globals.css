@@ -101,3 +101,8 @@ h1 {
     margin-top: 30rem !important;
   }
 }
+@media (max-height: 1222px) {
+  .children-main {
+    margin-top: 20rem !important;
+  }
+}
