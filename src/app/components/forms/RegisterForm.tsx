@@ -223,26 +223,17 @@ export default function RegisterForm() {
       const result = await registerUser(formData);
 
       // Check Symfony constrains violations
-      if (result.error) {
-        if (typeof result.error === "string") {
-          if (result.error === "Invalid or expired verification token.") {
-            setErrors({
-              general: "Votre lien de vérification est invalide ou expiré.",
-            });
-            // Optionally, do other logic here like redirecting or showing a retry option
-          } else {
-            setErrors({ general: result.error });
-          }
-        } else if (result.error.errors) {
-          setErrors(result.error.errors);
-        } else if (result.error.violations) {
-          const newErrors: { [key: string]: string } = {};
-          for (const violation of result.error.violations) {
-            newErrors[violation.propertyPath] = violation.message;
-          }
-          setErrors(newErrors);
+      if (typeof result.error === "string") {
+        if (result.error.includes("invitation")) {
+          setErrors({
+            invitationCode: "Le code d'invitation est invalide ou expiré.",
+          });
+        } else if (result.error.includes("verification token")) {
+          setErrors({
+            general: "Votre lien de vérification est invalide ou expiré.",
+          });
         } else {
-          setErrors({ general: JSON.stringify(result.error) });
+          setErrors({ general: result.error });
         }
       } else {
         sessionStorage.setItem("justRegistered", "true");
