@@ -498,6 +498,8 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
             {comments.map((comment) => {
               const canEditOrDelete =
                 isCommentAuthor(comment.user.id) || isFamilyAdmin;
+              console.log("Commentaire date creation", comment.createdAt);
+
               return (
                 <div
                   key={comment.id}
