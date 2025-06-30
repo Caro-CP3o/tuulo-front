@@ -92,7 +92,6 @@ h1 {
     margin-top: 0 !important;
   }
 }
-/* md:mt-20 mt-[35vh] */
 .main-auth,
 .main-public {
   margin-top: 5rem !important;
@@ -103,8 +102,3 @@ h1 {
     margin-top: 10rem !important;
   }
 }
-/* @media (max-height: 1222px) {
-  .main-auth {
-    margin-top: 10rem !important;
-  }
-} */
