@@ -109,6 +109,7 @@ export default function TopMenu() {
             className="h-auto"
           />
         </Link>
+        <div className="flex-1"></div>
         {/* Desktop: show login form */}
         <div className="hidden md:block">
           <LoginForm />
@@ -119,7 +120,7 @@ export default function TopMenu() {
             <UserCircle
               size={28}
               className={
-                showLoginForm ? "text-emerald-600/70" : "text-gray-600"
+                showLoginForm ? "text-emerald-600/70" : "text-blue-900/70"
               }
             />
           </button>
@@ -155,6 +156,7 @@ export default function TopMenu() {
             className="h-auto"
           />
         </Link>
+        <div className="flex-1"></div>
         {/* Desktop: full welcome + logout */}
         <div className="hidden md:flex flex-col items-end">
           <span>Bienvenue, {user.firstName} !</span>
@@ -192,6 +194,7 @@ export default function TopMenu() {
             className="h-auto"
           />
         </Link>
+        <div className="flex-1"></div>
         {/* Desktop: welcome text */}
         <span className="hidden md:flex">Bienvenue, {user.firstName}!</span>
         {/* Mobile: user icon with green shade */}
