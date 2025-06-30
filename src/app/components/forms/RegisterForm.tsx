@@ -66,16 +66,45 @@ export default function RegisterForm() {
   // ---------------------------
   // Effect load used colors
   // ---------------------------
+  // useEffect(() => {
+  //   if (!invitationCode) return;
+  //   fetchUsedFamilyColors(invitationCode)
+  //     .then((colors) => {
+  //       console.log("Fetched colors:", colors);
+  //       setUsedColors(colors);
+  //     })
+  //     .catch((err) => {
+  //       console.error("Failed to load used family colors:", err);
+  //       setUsedColors([]);
+  //     });
+  // }, [invitationCode]);
+
   useEffect(() => {
     if (!invitationCode) return;
+
     fetchUsedFamilyColors(invitationCode)
       .then((colors) => {
-        console.log("Fetched colors:", colors);
         setUsedColors(colors);
+        setErrors((prev) => ({ ...prev, invitationCode: "" })); // reset error
       })
       .catch((err) => {
         console.error("Failed to load used family colors:", err);
-        setUsedColors([]);
+
+        // Vérifier si c’est une erreur 401 ou autre
+        if (err?.response?.status === 401 || err?.response?.status === 404) {
+          setErrors((prev) => ({
+            ...prev,
+            invitationCode: "Ce code d'invitation est invalide ou expiré.",
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            invitationCode:
+              "Erreur lors de la vérification du code d'invitation. Veuillez réessayer.",
+          }));
+        }
+
+        setUsedColors([]); // reset colors
       });
   }, [invitationCode]);
 
@@ -187,6 +216,7 @@ export default function RegisterForm() {
     lastName.trim() !== "" &&
     birthDate !== "" &&
     color.trim() !== "" &&
+    !errors.invitationCode &&
     Object.values(errors).every((errMsg) => !errMsg);
 
   // ---------------------------
@@ -221,25 +251,35 @@ export default function RegisterForm() {
 
     try {
       const result = await registerUser(formData);
-
-      // Check Symfony constrains violations
-      if (typeof result.error === "string") {
-        if (result.error.includes("invitation")) {
-          setErrors({
-            invitationCode: "Le code d'invitation est invalide ou expiré.",
-          });
-        } else if (result.error.includes("verification token")) {
-          setErrors({
-            general: "Votre lien de vérification est invalide ou expiré.",
-          });
+      if (result.error) {
+        if (typeof result.error === "string") {
+          if (result.error.includes("invitation")) {
+            setErrors({
+              invitationCode: "Le code d'invitation est invalide ou expiré.",
+            });
+          } else if (result.error.includes("verification token")) {
+            setErrors({
+              general: "Votre lien de vérification est invalide ou expiré.",
+            });
+          } else {
+            setErrors({ general: result.error });
+          }
+        } else if (result.error.violations) {
+          const newErrors: { [key: string]: string } = {};
+          for (const violation of result.error.violations) {
+            newErrors[violation.propertyPath] = violation.message;
+          }
+          setErrors(newErrors);
         } else {
-          setErrors({ general: result.error });
+          setErrors({ general: JSON.stringify(result.error) });
         }
       } else {
         sessionStorage.setItem("justRegistered", "true");
         console.log(sessionStorage.getItem("justRegistered"));
         router.push("/registration-success");
       }
+      // Check Symfony constrains violations
+
       // if (result.error) {
       //   if (typeof result.error === "string") {
       //     setErrors({ general: result.error });
@@ -428,8 +468,15 @@ export default function RegisterForm() {
           value={invitationCode}
           onChange={(e) => setInvitationCode(e.target.value)}
           placeholder="Code d'invitation"
-          className="w-full p-2 border rounded-xl"
+          className={`w-full p-2 border rounded-xl ${
+            errors.invitationCode ? "border-red-500" : ""
+          }`}
         />
+        {errors.invitationCode && (
+          <p className="text-red-500 text-xs mt-1" role="alert">
+            {errors.invitationCode}
+          </p>
+        )}
 
         {errors.general && (
           <p className="text-red-400 text-sm my-2" role="alert">
