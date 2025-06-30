@@ -1,6 +1,6 @@
 export default function LegalPage() {
   return (
-    <main className="max-w-4xl mx-auto p-6 space-y-10">
+    <main className="max-w-4xl mx-auto p-6 space-y-10 md:mt-20 mt-[35vh]">
       {/* Politique de Confidentialité */}
       <section>
         <h1 className="text-3xl font-bold mb-4">

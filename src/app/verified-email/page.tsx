@@ -24,7 +24,7 @@ export default function VerifiedEmailPage() {
   // Conditional rendering on user's status
   // ---------------------------
   return (
-    <div className="flex gap-6 justify-center items-center flex-wrap w-full max-w-7xl my-8">
+    <div className="flex gap-6 justify-center items-center flex-wrap w-full max-w-7xl my-8 md:mt-20 mt-[35vh]">
       <Image
         src="/star.png"
         alt="star"

@@ -9,7 +9,7 @@ export default function InvitationRejectedPage() {
   const router = useRouter();
 
   return (
-    <div className="text-center py-4 flex flex-col justify-center items-center mx-10">
+    <div className="text-center py-4 flex flex-col justify-center items-center mx-1 md:mt-20 mt-[35vh]">
       <h2 className="border border-red-400 p-4 rounded-lg max-w-lg mb-12">
         Votre demande a été rejetée, veuillez contacter un membre de la famille
         pour plus d&apos;informations.

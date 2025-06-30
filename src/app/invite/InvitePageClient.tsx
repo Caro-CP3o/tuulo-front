@@ -42,7 +42,7 @@ export default function InvitePage() {
     return <p className="p-4 text-red-600">Invitation invalide ou expirée.</p>;
 
   return (
-    <div className="p-6 max-w-xl mx-auto text-center !space-y-4">
+    <div className="p-6 max-w-xl mx-auto text-center !space-y-4 md:mt-20 mt-[35vh]">
       <h1 className="text-2xl font-bold mb-4">
         🎉 Vous avez été invité à rejoindre la famille{" "}
         <span className="text-red-400 satisfy text-3xl">{familyName}</span>

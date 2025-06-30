@@ -10,7 +10,7 @@ export default function Home() {
   const router = useRouter();
   return (
     <>
-      <div className="relative flex flex-col justify-center items-center text-center px-10 space-y-6 max-w-m py-10">
+      <div className="relative flex flex-col justify-center items-center text-center px-10 space-y-6 max-w-m py-10 md:mt-20 mt-[35vh]">
         <h1 className="text-3xl font-bold !pb-6">Bienvenue sur Tuulo</h1>
 
         <p className="max-w-xl">

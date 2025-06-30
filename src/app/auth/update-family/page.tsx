@@ -55,7 +55,7 @@ export default function UpdateFamilyPage() {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6">
+    <div className="max-w-lg mx-auto p-6 md:mt-20 mt-[35vh]">
       <h1 className="text-2xl font-bold mb-4">Update Family</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

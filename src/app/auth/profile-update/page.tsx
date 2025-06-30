@@ -179,7 +179,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 p-6 md:p-10 w-full max-w-6xl mx-auto">
+    <div className="flex flex-col md:flex-row gap-8 p-6 md:p-10 w-full max-w-6xl mx-auto md:mt-20 mt-[35vh]">
       {/* ---------------------------
           Left panel: user info summary
         --------------------------- */}

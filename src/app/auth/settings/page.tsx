@@ -74,7 +74,7 @@ export default function SettingsPage() {
   if (!familyId) return <p className="text-center">Aucune famille assignée.</p>;
 
   return (
-    <div className="max-w-3xl mx-auto py-8 text-center">
+    <div className="max-w-3xl mx-auto py-8 text-center md:mt-20 mt-[35vh]">
       <div className="mb-20">
         <h1 className="text-2xl font-bold">
           Bienvenue dans l&apos;espace réservé à l&apos;administration de votre

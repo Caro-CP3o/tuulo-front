@@ -6,7 +6,7 @@ import RegisterForm from "../components/forms/RegisterForm";
 // ---------------------------
 export default function RegisterPage() {
   return (
-    <div className="text-center py-4 flex flex-col justify-center items-center mx-10">
+    <div className="text-center py-4 flex flex-col justify-center items-center mx-10 md:mt-20 mt-[35vh]">
       <h2 className="border border-red-400 p-4 rounded-lg max-w-lg mb-12">
         Vous souhaitez <strong>rejoindre une famille</strong> existante ? Prenez
         contact avec l&apos;un de ses membres et demandez votre code d&apos;
