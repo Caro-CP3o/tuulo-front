@@ -7,6 +7,10 @@ import type { FamilyMemberType, FamilyType, MediaObjectType, PostType, UserType 
 // ---------------------------
 // REGISTER USER
 // ---------------------------
+type Violation = {
+  propertyPath: string;
+  message: string;
+};
 export async function registerUser(formData: FormData) {
   try {
     const imageFile = formData.get("avatar") as File | null;
@@ -21,13 +25,15 @@ export async function registerUser(formData: FormData) {
         body: imageData,
       });
 
+      const errorData = await res.json().catch(() => null);
       if (!res.ok) {
-        const error = await res.json();
-        return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
+        return {
+          error: errorData?.message || errorData?.["hydra:description"] || "Image upload failed"
+        };
       }
 
-      const media = await res.json();
-      imageIri = media["@id"];
+      const media = errorData; // reuse already parsed JSON
+      imageIri = media?.["@id"] || null;
     }
 
     const userPayload = {
@@ -48,12 +54,72 @@ export async function registerUser(formData: FormData) {
       body: JSON.stringify(userPayload),
     });
 
-    const data = await res.json();
-    return res.ok ? { data } : { error: data.message || JSON.stringify(data) };
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      if (data?.violations && Array.isArray(data.violations)) {
+        const messages = data.violations
+          .map((v: Violation) => `${v.propertyPath}: ${v.message}`)
+          .join(", ");
+        return { error: messages };
+      }
+      return {
+        error: data?.message || data?.["hydra:description"] || "Registration failed"
+      };
+    }
+
+    return { data };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Network error" };
   }
 }
+// export async function registerUser(formData: FormData) {
+//   try {
+//     const imageFile = formData.get("avatar") as File | null;
+//     let imageIri: string | null = null;
+
+//     if (imageFile) {
+//       const imageData = new FormData();
+//       imageData.append("file", imageFile);
+
+//       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/media_objects`, {
+//         method: "POST",
+//         body: imageData,
+//       });
+
+//       if (!res.ok) {
+//         const error = await res.json();
+//         return { error: `Image upload failed: ${error.message || JSON.stringify(error)}` };
+//       }
+
+//       const media = await res.json();
+//       imageIri = media["@id"];
+//     }
+
+//     const userPayload = {
+//       email: formData.get("email"),
+//       password: formData.get("password"),
+//       firstName: formData.get("firstName"),
+//       lastName: formData.get("lastName"),
+//       birthDate: formData.get("birthDate"),
+//       color: formData.get("color"),
+//       alias: formData.get("alias") || null,
+//       avatar: imageIri,
+//       invitationCode: formData.get("invitationCode") || null,
+//     };
+
+//     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(userPayload),
+//     });
+
+//     const data = await res.json();
+//     return res.ok ? { data } : { error: data.message || JSON.stringify(data) };
+//   } catch (err) {
+//     return { error: err instanceof Error ? err.message : "Network error" };
+//   }
+// }
 // ---------------------------
 // LOGIN
 // ---------------------------
