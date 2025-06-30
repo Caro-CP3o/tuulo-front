@@ -24,6 +24,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  console.log(errors);
 
   const router = useRouter();
   const { refresh } = useAuth();
@@ -157,51 +158,6 @@ export default function ProfilePage() {
     }
     setLoading(false);
   };
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!user) return;
-
-  //   setLoading(true);
-  //   setError(null);
-
-  //   // Build form data to send only changed fields
-  //   const formData = new FormData();
-  //   if (oldPassword) formData.append("oldPassword", oldPassword);
-  //   if (newPassword) formData.append("password", newPassword);
-  //   if (firstName !== user.firstName) formData.append("firstName", firstName);
-  //   if (lastName !== user.lastName) formData.append("lastName", lastName);
-  //   if ((alias || "") !== (user.alias || ""))
-  //     formData.append("alias", alias || "");
-  //   if (avatar) formData.append("avatar", avatar);
-
-  //   const result = await updateMe(formData);
-  //   if (result.error) {
-  //     try {
-  //       const parsed = JSON.parse(result.error);
-  //       if (parsed.violations) {
-  //         const apiErrors: { [key: string]: string } = {};
-  //         parsed.violations.forEach((violation: any) => {
-  //           apiErrors[violation.propertyPath] = violation.message;
-  //         });
-  //         setErrors(apiErrors);
-  //       } else {
-  //         setError(result.error); // fallback
-  //       }
-  //     } catch {
-  //       setError(result.error);
-  //     }
-  //   } else {
-  //     alert("Profil mis à jour !");
-  //     if (avatar) setCurrentAvatarUrl(previewUrl);
-  //     setOldPassword("");
-  //     setNewPassword("");
-  //     setErrors({});
-  //     refresh();
-  //     router.push("/home");
-  //   }
-
-  //   setLoading(false);
-  // };
 
   // ---------------------------
   // Handle account deletion with confirmation
@@ -311,7 +267,7 @@ export default function ProfilePage() {
               className="w-full p-2 border rounded"
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium">
               Mot de passe actuel
             </label>
@@ -337,7 +293,7 @@ export default function ProfilePage() {
           </div>
           {errors.newPassword && (
             <p className="text-red-500 text-sm">{errors.newPassword}</p>
-          )}
+          )} */}
 
           {/* Display server-side error if any */}
           {error && <p className="text-red-500 text-sm">{error}</p>}

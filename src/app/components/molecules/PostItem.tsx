@@ -70,9 +70,12 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
   const authorLastName = author.lastName;
   const alias = author?.alias || "";
   const authorColor = author?.color || "#888888";
+  // const avatarUrl = author?.avatar?.contentUrl
+  //   ? `${process.env.NEXT_PUBLIC_API_URL}${author.avatar.contentUrl}`
+  //   : "/default-avatar.png";
   const avatarUrl = author?.avatar?.contentUrl
     ? `${process.env.NEXT_PUBLIC_API_URL}${author.avatar.contentUrl}`
-    : "/default-avatar.png";
+    : null;
   const videoUrl = video?.contentUrl
     ? `${process.env.NEXT_PUBLIC_API_URL}${post.video?.contentUrl}`
     : null;
@@ -378,7 +381,19 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
               className="flex"
               style={{ backgroundColor: `${authorColor}50` }}
             >
-              <div className="flex flex-col items-center p-4 max-w-full">
+              {avatarUrl && (
+                <div className="flex flex-col items-center p-4 max-w-full">
+                  <Image
+                    src={avatarUrl}
+                    alt="Avatar"
+                    width={50}
+                    height={50}
+                    className="rounded-full object-cover mb-2 bg-white"
+                    unoptimized
+                  />
+                </div>
+              )}
+              {/* <div className="flex flex-col items-center p-4 max-w-full">
                 <Image
                   src={avatarUrl}
                   alt="Avatar"
@@ -387,7 +402,7 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
                   className="rounded-full object-cover mb-2 bg-white"
                   unoptimized
                 />
-              </div>
+              </div> */}
               <div className="flex flex-col justify-center">
                 <p className="satisfy text-xl">
                   {authorFirstName} {authorLastName} - {alias}
