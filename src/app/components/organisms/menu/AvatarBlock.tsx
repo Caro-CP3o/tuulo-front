@@ -44,11 +44,9 @@ export default function AvatarBlock({
         </div>
       ) : (
         <div
-          className="w-24 h-24 rounded-full overflow-hidden border-[5px] mb-4 bg-gray-200 flex items-center justify-center"
+          className="w-24 h-24 rounded-full overflow-hidden border-[5px] mb-4 bg-red-400/10 flex items-center justify-center"
           style={{ borderColor }}
-        >
-          No Avatar
-        </div>
+        ></div>
       )}
       <Image
         src="/star.png"

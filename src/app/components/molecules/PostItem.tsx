@@ -393,7 +393,7 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
                   />
                 ) : (
                   <div
-                    className="rounded-full mb-2 bg-white"
+                    className="rounded-full mb-2 bg-red-400/10"
                     style={{ width: 50, height: 50, border: "2px solid #ccc" }}
                   />
                 )}
