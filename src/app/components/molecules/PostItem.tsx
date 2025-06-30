@@ -381,8 +381,8 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
               className="flex"
               style={{ backgroundColor: `${authorColor}50` }}
             >
-              {avatarUrl && (
-                <div className="flex flex-col items-center p-4 max-w-full">
+              <div className="flex flex-col items-center p-4 max-w-full">
+                {avatarUrl ? (
                   <Image
                     src={avatarUrl}
                     alt="Avatar"
@@ -391,8 +391,13 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
                     className="rounded-full object-cover mb-2 bg-white"
                     unoptimized
                   />
-                </div>
-              )}
+                ) : (
+                  <div
+                    className="rounded-full mb-2 bg-white"
+                    style={{ width: 50, height: 50, border: "2px solid #ccc" }}
+                  />
+                )}
+              </div>
               {/* <div className="flex flex-col items-center p-4 max-w-full">
                 <Image
                   src={avatarUrl}
