@@ -104,7 +104,7 @@ export default function FamilyMembersList() {
       <p className="text-red-400 border border-red-400 rounded-xl font-semibold p-4 mb-6">
         Attention, ces actions sont irréversibles. Supprimer un membre
         entraînera la suppression de son affiliation à la famille, cependant il
-        conservera son profil.
+        conservera son compte.
       </p>
       {/* List of active family members with role */}
       {members

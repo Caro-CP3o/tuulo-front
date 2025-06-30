@@ -54,10 +54,10 @@ export default function SidebarContent({
           <Link href="/profile">
             <MenuItem icon={<UserCircle size={20} />} label="Profile" />
           </Link>
-          <Link href="#" className="text-blue-900/30 hover:text-blue-900/30">
+          <Link href="#" className="text-blue-900/30 !hover:text-blue-900/30">
             <MenuItem icon={<Notebook size={20} />} label="Notes" />
           </Link>
-          <Link href="#" className="text-blue-900/30 hover:text-blue-900/30">
+          <Link href="#" className="text-blue-900/30 !hover:text-blue-900/30">
             <MenuItem icon={<MessageSquareText size={20} />} label="Messages" />
           </Link>
           {/* Admin section */}

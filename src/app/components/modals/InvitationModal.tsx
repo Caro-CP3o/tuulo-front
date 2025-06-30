@@ -42,7 +42,7 @@ export default function InvitationModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-blue-900 bg-opacity-40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-blue-900 bg-opacity-40 flex items-center justify-center z-[9999]">
       <div className="bg-white rounded p-6 w-full max-w-md shadow">
         <h2 className="text-xl font-bold mb-4">Rejoindre une famille</h2>
         <form onSubmit={handleSubmit} className="space-y-4">

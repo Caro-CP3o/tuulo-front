@@ -48,7 +48,7 @@ export default function EditPostModal({
   const isVideoFile = file?.type?.startsWith("video/");
 
   return (
-    <div className="fixed inset-0 z-[9988] flex items-center justify-center bg-white/70">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/70">
       <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Modifier le post</h2>
         <div className="flex flex-col gap-3">

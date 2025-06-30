@@ -163,8 +163,6 @@ export default function ProfilePage() {
   // Handle account deletion with confirmation
   // ---------------------------
   const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer votre compte ?")) return;
-
     setLoading(true);
     const result = await deleteMe();
 
@@ -267,33 +265,6 @@ export default function ProfilePage() {
               className="w-full p-2 border rounded"
             />
           </div>
-          {/* <div>
-            <label className="block text-sm font-medium">
-              Mot de passe actuel
-            </label>
-            <input
-              type="password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              placeholder="Votre mot de passe actuel"
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">
-              Nouveau mot de passe
-            </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Nouveau mot de passe"
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          {errors.newPassword && (
-            <p className="text-red-500 text-sm">{errors.newPassword}</p>
-          )} */}
 
           {/* Display server-side error if any */}
           {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -309,7 +280,13 @@ export default function ProfilePage() {
 
             <button
               type="button"
-              onClick={handleDelete}
+              onClick={() => {
+                if (
+                  confirm("Êtes-vous sûr de vouloir supprimer votre compte ?")
+                ) {
+                  handleDelete();
+                }
+              }}
               className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600"
             >
               Supprimer mon compte
