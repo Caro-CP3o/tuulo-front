@@ -97,7 +97,7 @@ h1 {
   margin-top: 5rem !important;
 }
 @media (max-width: 375px) and (max-height: 670px) {
-  .children-auth {
-    margin-top: 30rem !important;
+  .children-main {
+    margin-top: 15rem !important;
   }
 }

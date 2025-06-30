@@ -24,7 +24,7 @@ export default function RootLayout({
             <div className="w-full z-[9988] sticky top-0">
               <TopMenu />
             </div>
-            <main className="flex flex-col justify-center items-center flex-1">
+            <main className="children-main flex flex-col justify-center items-center flex-1">
               {children}
             </main>
             <Footer />
