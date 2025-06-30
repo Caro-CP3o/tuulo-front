@@ -98,7 +98,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // No family or unknown status
         if (
           pathname !== "/create-family" &&
-          pathname !== "/registration-success"
+          pathname !== "/registration-success" &&
+          pathname !== "/verified-email" &&
+          pathname !== "/legal" &&
+          pathname !== "/"
         ) {
           router.push("/create-family");
         }

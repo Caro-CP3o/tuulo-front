@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import RegisterForm from "../components/forms/RegisterForm";
 // ---------------------------
 // User registration page
@@ -16,6 +17,9 @@ export default function RegisterPage() {
         <h1 className="text-xl font-bold mb-4">
           Inscrivez-vous et créez votre famille ! 🏡👨‍👩‍👧‍👦🌸
         </h1>
+        <Link href="/create-family" className="text-blue-500 hover:underline">
+          Déjà inscrit ? Créez ou rejoinez une famille !
+        </Link>
         <RegisterForm />
       </div>
     </div>
