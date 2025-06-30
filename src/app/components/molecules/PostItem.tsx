@@ -393,7 +393,11 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
                   {authorFirstName} {authorLastName} - {alias}
                 </p>
                 <p className="text-sm">
-                  {new Date(createdAt).toLocaleDateString()}
+                  {new Date(createdAt).toLocaleString("fr-FR", {
+                    timeZone: "Europe/Paris",
+                  })}
+
+                  {/* {new Date(createdAt).toLocaleDateString()} */}
                 </p>
                 <p className="text-sm text-gray-500">
                   posté à{" "}
