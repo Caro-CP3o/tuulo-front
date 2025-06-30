@@ -16,9 +16,12 @@ export default function TopMenu() {
   const router = useRouter();
 
   const familyStatus = user?.familyMembers?.[0]?.status ?? null;
-
+  // ---------------------------
+  // State variables
+  // ---------------------------
   const [isHidden, setIsHidden] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [showLoginForm, setShowLoginForm] = useState(false);
 
   // ---------------------------
   // Effect track scroll up & down
@@ -30,7 +33,7 @@ export default function TopMenu() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      if (currentScrollY > lastScrollY && currentScrollY > 10) {
         // Scrolling down and scrolled more than 50px → hide
         setIsHidden(true);
       } else if (currentScrollY < lastScrollY) {
@@ -70,9 +73,8 @@ export default function TopMenu() {
     : `${baseHeaderClasses} translate-y-0`;
 
   // ---------------------------
-  // Conditional rendering
+  // Error page (logo))
   // ---------------------------
-  // If error page (logo)
   if (isErrorPage) {
     return (
       <header
@@ -90,12 +92,13 @@ export default function TopMenu() {
       </header>
     );
   }
-
+  // ---------------------------
   // Case 1: No user (logo + login form)
+  // ---------------------------
   if (!loading && !user) {
     return (
       <header
-        className={`${headerClasses} flex-col md:flex-row justify-between items-center gap-6`}
+        className={`${headerClasses} flex justify-between items-center w-full`}
       >
         <Link href="/">
           <Image
@@ -106,14 +109,33 @@ export default function TopMenu() {
             className="h-auto"
           />
         </Link>
-        <div className="py-6 md:py-0">
+        {/* Desktop: show login form */}
+        <div className="hidden md:block">
           <LoginForm />
         </div>
+        {/* Mobile: toggle login form */}
+        <div className="md:hidden">
+          <button onClick={() => setShowLoginForm(!showLoginForm)}>
+            <UserCircle
+              size={28}
+              className={
+                showLoginForm ? "text-emerald-600/70" : "text-gray-600"
+              }
+            />
+          </button>
+        </div>
+        {/* Mobile: show/hide form below */}
+        {showLoginForm && (
+          <div className="absolute top-full left-0 w-full bg-white shadow-md p-4 z-50">
+            <LoginForm />
+          </div>
+        )}
       </header>
     );
   }
-
-  // Case 2: Logged in with status pending/rejected (logo + logout button)
+  // ---------------------------
+  // Case 2: Logged in with status pending/rejected (logo + logout button
+  // ---------------------------
   if (
     user &&
     (familyStatus === "pending" ||
@@ -122,7 +144,7 @@ export default function TopMenu() {
   ) {
     return (
       <header
-        className={`${headerClasses} flex-wrap flex justify-center items-center`}
+        className={`${headerClasses} flex justify-between items-center w-full`}
       >
         <Link href="/">
           <Image
@@ -133,29 +155,33 @@ export default function TopMenu() {
             className="h-auto"
           />
         </Link>
-        <div className="flex flex-wrap md:flex-col flex-row gap-1 absolute top-20 md:top-6 right-12 items-end">
+        {/* Desktop: full welcome + logout */}
+        <div className="hidden md:flex flex-col items-end">
           <span>Bienvenue, {user.firstName} !</span>
-          <div className="flex items-center space-x-2 text-red-400 hover:text-red-400 ">
-            <UserCircle size={20} />
-            <button
-              onClick={handleLogout}
-              className="mt-1 text-sm transition-colors"
-            >
-              Se déconnecter
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center text-red-400 hover:text-red-500"
+          >
+            <UserCircle size={20} className="mr-1" />
+            <span className="text-sm">Se déconnecter</span>
+          </button>
+        </div>
+        {/* Mobile: just logout icon */}
+        <div className="md:hidden">
+          <button onClick={handleLogout}>
+            <UserCircle size={28} className="text-red-400" />
+          </button>
         </div>
       </header>
     );
   }
-
+  // ---------------------------
   // Case 3: Logged in with status active (logo + welcome message)
+  // ---------------------------
   if (user && familyStatus === "active") {
     return (
       <header
-        className={
-          headerClasses + " relative flex-wrap justify-center items-center"
-        }
+        className={`${headerClasses} flex justify-between items-center w-full`}
       >
         <Link href="/home">
           <Image
@@ -166,9 +192,12 @@ export default function TopMenu() {
             className="h-auto"
           />
         </Link>
-        <span className="absolute right-12 items-end hidden md:flex">
-          Bienvenue, {user.firstName}!
-        </span>
+        {/* Desktop: welcome text */}
+        <span className="hidden md:flex">Bienvenue, {user.firstName}!</span>
+        {/* Mobile: user icon with green shade */}
+        <div className="md:hidden">
+          <UserCircle size={28} className="text-emerald-600/50" />
+        </div>
       </header>
     );
   }
