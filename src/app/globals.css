@@ -98,6 +98,6 @@ h1 {
 }
 @media (max-width: 375px) and (max-height: 670px) {
   .children-auth {
-    margin-top: 20rem !important;
+    margin-top: 30rem !important;
   }
 }
