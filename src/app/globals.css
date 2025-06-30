@@ -94,15 +94,15 @@ h1 {
 }
 /* md:mt-20 mt-[35vh] */
 .children-auth {
-  margin-top: 10rem !important;
+  margin-top: 5rem !important;
 }
 @media (max-width: 375px) and (max-height: 670px) {
   .children-main {
-    margin-top: 30rem !important;
+    margin-top: 15rem !important;
   }
 }
 @media (max-height: 1222px) {
   .children-main {
-    margin-top: 20rem !important;
+    margin-top: 10rem !important;
   }
 }
