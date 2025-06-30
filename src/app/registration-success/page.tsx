@@ -29,7 +29,7 @@ export default function RegistrationSuccess() {
   }, [router]);
 
   return (
-    <div className="p-6 max-w-xl mx-auto text-center md:mt-20 mt-[35vh]">
+    <div className="p-6 max-w-xl mx-auto text-center ">
       <div className="bg-blue-900 p-8 rounded-lg mb-12">
         <h1 className="text-2xl font-semibold !text-white rounded-lg">
           Inscription réussie 🎉

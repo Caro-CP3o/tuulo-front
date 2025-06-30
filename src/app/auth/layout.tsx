@@ -35,8 +35,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
         <div className="md:grid md:grid-cols-4 min-h-screen mx-auto w-full">
           <SidebarMenu />
-          <main className="main-auth col-span-full md:col-span-3 mt-6 px-4 w-full pb-40">
-            <div className="max-w-4xl mx-auto w-full">{children}</div>
+          <main className="main-auth col-span-full md:col-span-3 px-4 w-full pb-40">
+            <div className="children-auth max-w-4xl mx-auto w-full">
+              {children}
+            </div>
           </main>
         </div>
       </AuthProvider>

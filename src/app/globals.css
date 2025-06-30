@@ -92,3 +92,12 @@ h1 {
     margin-top: 0 !important;
   }
 }
+/* md:mt-20 mt-[35vh] */
+.children-auth {
+  margin-top: 5rem !important;
+}
+@media (max-width: 375px) and (max-height: 670px) {
+  .children-auth {
+    margin-top: 35vh !important;
+  }
+}

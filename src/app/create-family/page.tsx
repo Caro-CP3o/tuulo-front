@@ -43,7 +43,7 @@ export default function CreateFamilyPage() {
 
   return (
     <>
-      <div className="flex gap-12 justify-center items-center flex-wrap w-full max-w-7xl my-8 md:mt-20 mt-[35vh]">
+      <div className="flex gap-12 justify-center items-center flex-wrap w-full max-w-7xl my-8 ">
         {/* Create new family form */}
         <div>
           <CreateFamilyForm />
