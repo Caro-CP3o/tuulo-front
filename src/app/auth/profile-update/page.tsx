@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { updateMe, fetchMe, deleteMe } from "@/lib/api";
 import Image from "next/image";
 import { hasRole } from "@/helpers/auth";
-import type { UserType } from "@/types/api";
+import type { UserType, Violation } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 
@@ -23,9 +23,33 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const router = useRouter();
   const { refresh } = useAuth();
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (newPassword) {
+      const hasUpper = /[A-Z]/.test(newPassword);
+      const hasLower = /[a-z]/.test(newPassword);
+      const hasNumber = /\d/.test(newPassword);
+      const hasSpecial = /[^\w\s]/.test(newPassword);
+      if (
+        newPassword.length < 8 ||
+        !hasUpper ||
+        !hasLower ||
+        !hasNumber ||
+        !hasSpecial
+      ) {
+        newErrors.newPassword =
+          "Mot de passe invalide. Il doit contenir 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial et au moins 8 caractères.";
+      }
+    }
+
+    return newErrors;
+  };
 
   // ---------------------------
   // Fetch user profile on mount
@@ -88,8 +112,15 @@ export default function ProfilePage() {
 
     setLoading(true);
     setError(null);
+    setErrors({});
 
-    // Build form data to send only changed fields
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setLoading(false);
+      return;
+    }
+
     const formData = new FormData();
     if (oldPassword) formData.append("oldPassword", oldPassword);
     if (newPassword) formData.append("password", newPassword);
@@ -101,19 +132,76 @@ export default function ProfilePage() {
 
     const result = await updateMe(formData);
     if (result.error) {
-      setError(result.error);
+      try {
+        const parsed = JSON.parse(result.error);
+        if (parsed.violations) {
+          const apiErrors: { [key: string]: string } = {};
+          parsed.violations.forEach((v: Violation) => {
+            apiErrors[v.propertyPath] = v.message;
+          });
+          setErrors(apiErrors);
+        } else {
+          setError(result.error);
+        }
+      } catch {
+        setError(result.error);
+      }
     } else {
       alert("Profil mis à jour !");
       if (avatar) setCurrentAvatarUrl(previewUrl);
       setOldPassword("");
       setNewPassword("");
-
+      setErrors({});
       refresh();
       router.push("/home");
     }
-
     setLoading(false);
   };
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!user) return;
+
+  //   setLoading(true);
+  //   setError(null);
+
+  //   // Build form data to send only changed fields
+  //   const formData = new FormData();
+  //   if (oldPassword) formData.append("oldPassword", oldPassword);
+  //   if (newPassword) formData.append("password", newPassword);
+  //   if (firstName !== user.firstName) formData.append("firstName", firstName);
+  //   if (lastName !== user.lastName) formData.append("lastName", lastName);
+  //   if ((alias || "") !== (user.alias || ""))
+  //     formData.append("alias", alias || "");
+  //   if (avatar) formData.append("avatar", avatar);
+
+  //   const result = await updateMe(formData);
+  //   if (result.error) {
+  //     try {
+  //       const parsed = JSON.parse(result.error);
+  //       if (parsed.violations) {
+  //         const apiErrors: { [key: string]: string } = {};
+  //         parsed.violations.forEach((violation: any) => {
+  //           apiErrors[violation.propertyPath] = violation.message;
+  //         });
+  //         setErrors(apiErrors);
+  //       } else {
+  //         setError(result.error); // fallback
+  //       }
+  //     } catch {
+  //       setError(result.error);
+  //     }
+  //   } else {
+  //     alert("Profil mis à jour !");
+  //     if (avatar) setCurrentAvatarUrl(previewUrl);
+  //     setOldPassword("");
+  //     setNewPassword("");
+  //     setErrors({});
+  //     refresh();
+  //     router.push("/home");
+  //   }
+
+  //   setLoading(false);
+  // };
 
   // ---------------------------
   // Handle account deletion with confirmation
@@ -247,6 +335,9 @@ export default function ProfilePage() {
               className="w-full p-2 border rounded"
             />
           </div>
+          {errors.newPassword && (
+            <p className="text-red-500 text-sm">{errors.newPassword}</p>
+          )}
 
           {/* Display server-side error if any */}
           {error && <p className="text-red-500 text-sm">{error}</p>}

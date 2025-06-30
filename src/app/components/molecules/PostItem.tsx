@@ -511,7 +511,9 @@ export default function PostItem({ post, onDelete }: PostItemProps) {
                       "Anonymous"}
                   </h3>
                   <span className="text-xs text-gray-500">
-                    {new Date(comment.createdAt).toLocaleString()}
+                    {new Date(comment.createdAt).toLocaleString("fr-FR", {
+                      timeZone: "Europe/Paris",
+                    })}
                   </span>
                   {/* Comment update */}
                   {editingCommentId === comment.id ? (

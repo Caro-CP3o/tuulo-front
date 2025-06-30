@@ -127,3 +127,10 @@ export type MediaObjectType = {
   id: number;
   contentUrl: string;
 };
+// ---------------------------
+// CONSTRAINS VIOLATION TYPE
+// ---------------------------
+export type Violation = {
+  propertyPath: string;
+  message: string;
+};
