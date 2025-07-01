@@ -193,7 +193,7 @@ export default function TopMenu() {
       <header
         className={`${headerClasses} flex justify-between items-center w-full`}
       >
-        <div className="flex-1"></div>
+        {/* <div className="flex-1"></div> */}
         <Link href="/home">
           <Image
             src="/tuulo_logo.png"
