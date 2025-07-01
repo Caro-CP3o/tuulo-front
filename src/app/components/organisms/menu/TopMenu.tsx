@@ -169,7 +169,7 @@ export default function TopMenu() {
           </button>
           <Link
             href="/create-family"
-            className="flex items-center text-red-400 hover:text-red-400"
+            className="flex items-center text-blue-900/50 hover:text-red-400"
           >
             <House size={20} className="mr-1" />
             <span className="text-sm">Créér une famille</span>
