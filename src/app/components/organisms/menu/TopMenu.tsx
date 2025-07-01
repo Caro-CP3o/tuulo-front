@@ -6,7 +6,7 @@ import LoginForm from "../../forms/LoginForm";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/api";
-import { UserCircle } from "lucide-react";
+import { House, UserCircle } from "lucide-react";
 import { useErrorPage } from "@/app/context/ErrorPageContext";
 import { useEffect, useState } from "react";
 
@@ -167,6 +167,13 @@ export default function TopMenu() {
             <UserCircle size={20} className="mr-1" />
             <span className="text-sm">Se déconnecter</span>
           </button>
+          <Link
+            href="/create-family"
+            className="flex items-center text-red-400 hover:text-red-500"
+          >
+            <House size={20} className="mr-1" />
+            <span className="text-sm">Créér une famille</span>
+          </Link>
         </div>
         {/* Mobile: just logout icon */}
         <div className="md:hidden">
