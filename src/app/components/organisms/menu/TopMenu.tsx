@@ -193,6 +193,7 @@ export default function TopMenu() {
       <header
         className={`${headerClasses} flex justify-between items-center w-full`}
       >
+        <div className="flex-1"></div>
         <Link href="/home">
           <Image
             src="/tuulo_logo.png"
@@ -202,7 +203,7 @@ export default function TopMenu() {
             className="h-auto"
           />
         </Link>
-        <div className="flex-1"></div>
+
         {/* Desktop: welcome text */}
         <span className="hidden md:flex">Bienvenue, {user.firstName}!</span>
         {/* Mobile: user icon with green shade */}
