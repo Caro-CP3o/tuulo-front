@@ -167,13 +167,32 @@ export default function TopMenu() {
             <UserCircle size={20} className="mr-1" />
             <span className="text-sm">Se déconnecter</span>
           </button>
-          <Link
+          <div className="md:hidden">
+            <button
+              onClick={() => setShowLoginForm(!showLoginForm)}
+              className="flex items-center text-red-400 hover:text-red-400"
+            >
+              <House
+                size={28}
+                className={
+                  showLoginForm ? "text-emerald-600/70" : "text-blue-900/70"
+                }
+              />
+            </button>
+            {showLoginForm && (
+              <div className="absolute top-full left-0 w-full bg-white shadow-md p-4 z-50">
+                Créér une famille
+              </div>
+            )}
+          </div>
+
+          {/* <Link
             href="/create-family"
-            className="flex items-center text-red-400 hover:text-red-500"
+            className="flex items-center text-red-400 hover:text-red-400"
           >
             <House size={20} className="mr-1" />
             <span className="text-sm">Créér une famille</span>
-          </Link>
+          </Link> */}
         </div>
         {/* Mobile: just logout icon */}
         <div className="md:hidden">
