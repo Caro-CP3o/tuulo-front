@@ -207,9 +207,9 @@ export default function TopMenu() {
         {/* Desktop: welcome text */}
         <span className="hidden md:flex">Bienvenue, {user.firstName}!</span>
         {/* Mobile: user icon with green shade */}
-        <div className="md:hidden">
+        {/* <div className="md:hidden">
           <UserCircle size={28} className="text-emerald-600/50" />
-        </div>
+        </div> */}
       </header>
     );
   }
