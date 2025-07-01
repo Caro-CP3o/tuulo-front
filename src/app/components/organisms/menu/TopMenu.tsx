@@ -167,15 +167,14 @@ export default function TopMenu() {
             <UserCircle size={20} className="mr-1" />
             <span className="text-sm">Se déconnecter</span>
           </button>
+          <Link
+            href="/create-family"
+            className="flex items-center text-red-400 hover:text-red-400"
+          >
+            <House size={20} className="mr-1" />
+            <span className="text-sm">Créér une famille</span>
+          </Link>
         </div>
-
-        <Link
-          href="/create-family"
-          className="flex items-center text-red-400 hover:text-red-400"
-        >
-          <House size={20} className="mr-1" />
-          <span className="text-sm">Créér une famille</span>
-        </Link>
 
         {/* Mobile: just logout icon */}
         <div className="md:hidden">
